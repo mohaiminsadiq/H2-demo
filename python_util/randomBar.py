@@ -5,8 +5,7 @@ from bokeh.models import ColumnDataSource, HoverTool, PrintfTickFormatter
 from bokeh.plotting import figure
 from bokeh.transform import factor_cmap
 
-
-def get_bokeh_chart():
+def get_bokeh_chart(y_lab="y", x_lab="x"):
 	# Creating a list of categories
 	years = np.arange(15)
 	values = np.arange(15)
@@ -24,7 +23,7 @@ def get_bokeh_chart():
 		   line_dash='dashed'
 		  
 	  )#Signing the axis
-	p.xaxis.axis_label="Years"
-	p.yaxis.axis_label="Measles stats"
+	p.xaxis.axis_label=x_lab
+	p.yaxis.axis_label=y_lab
 	
 	return components(p)
