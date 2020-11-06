@@ -1,5 +1,16 @@
+from python_util import randomBar
+
 from flask import Flask, render_template, request, redirect, url_for
 app = Flask(__name__)
+
+@app.route('/bokeh_self_check', methods=['POST', 'GET'])
+def bokeh_self_check():
+	
+	src, plt = randomBar.get_bokeh_chart()
+
+	return render_template('bokeh_test.html',
+							bokeh_plot=plt,
+							bokeh_src=src)
 
 @app.route('/', methods=['POST', 'GET'])
 def home():
