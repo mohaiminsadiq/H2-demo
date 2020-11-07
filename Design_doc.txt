@@ -1,0 +1,48 @@
+
+----------Modified GPliess code---------
+class BURDEN_Model:
+    def Burden_eq_odds():
+    
+class SHAP_Model:
+    def Shap_eq_odds():
+    
+----------Ghosh_API.py----------
+
+class debiaser:
+    def __init__(self, method, calibrated)
+
+    def get_model_results(CSV_file_name, method="shap", calibrated=False):
+        if method is "shap":
+            # read
+            # split 
+            # get mix rates 
+            # make 2 new models
+            # return results
+            return equialized_oddds_shap(CSV_file_name, True)
+            
+            
+    def get_conv_hulls()
+    
+    def get_delta_demo()
+    
+    def get_instance_graph()
+    
+    def get_cfacts()
+        if self.method is "shap":
+            return None
+            raise ValueError
+            
+    ....
+|
+|pythonUtil
+|
+||API.py
+||
+||modules/
+|||BurdenModel.py -> augmented gpliess code
+|||ShapModel.py   -> augmented gpliess code
+||
+||CSV/
+|||<Dataset>_<Method>_<base|full|{other desc.}>.csv
+||Strings/
+|||Descriptions.py -> strings
