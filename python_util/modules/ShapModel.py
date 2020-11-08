@@ -140,7 +140,7 @@ class ShapModel:
             print("FP Cost and FN Cost difference after post processing {} {}".format((self.eq_odds_group_1_test_model.fp_cost() - self.eq_odds_group_0_test_model.fp_cost()), ((self.eq_odds_group_1_test_model.fn_cost() - self.eq_odds_group_0_test_model.fn_cost()))))
 
     @staticmethod
-    def drawBokehGraph(dataset, calib_eq_odds_group_0_test_model_shap, calib_eq_odds_group_1_test_model_shap, calib_eq_odds_group_0_test_model, calib_eq_odds_group_1_test_model):  
+    def draw_shap_calib_eq_odds_plot(dataset, calib_eq_odds_group_0_test_model_shap, calib_eq_odds_group_1_test_model_shap, calib_eq_odds_group_0_test_model, calib_eq_odds_group_1_test_model):  
         my_path = os.path.abspath(os.path.dirname(__file__))
         if dataset == 'compas':
             data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
@@ -168,8 +168,8 @@ class ShapModel:
         TOOLS="hover,crosshair,pan,wheel_zoom,zoom_in,zoom_out,box_zoom,undo,redo,reset,tap,save,box_select,poly_select,lasso_select,"
         shap_df = pd.DataFrame(list(zip(shap_shap, shap_pred,weights_shap)), columns=["shap","pred","weights"])
         random_shap_df = pd.DataFrame(list(zip(random_shap, random_pred,weights_random)), columns=["shap","pred","weights"])
-        shap_df.to_csv("shap_df.csv", index = False)
-        random_shap_df.to_csv("random_shap_df.csv", index = False)
+        #shap_df.to_csv("shap_df.csv", index = False)
+        #random_shap_df.to_csv("random_shap_df.csv", index = False)
         size_mapper=LinearInterpolator(
             x=[shap_df.weights.min(), shap_df.weights.max()],
             y=[5,50]
@@ -190,45 +190,87 @@ class ShapModel:
 
         p.renderers.extend([vline, hline])
         p.legend.click_policy="hide"
-        #show(p)  # open a browser
+        #show(p)
         return components(p)
 
     @staticmethod
     def plot_shap_summaryplot(dataset):
         my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
 
-        if dataset == "compas":
-            shap_values = pd.read_csv(os.path.join(my_path, "../data/compas_shap_random_allfeatures.csv"))
-            data_final = pd.read_csv(os.path.join(my_path, "../data/compas_processed.csv"))
-            independent_columns  = ['priors_count','age_cat_25_45', 'age_cat_Greaterthan45',
-            'age_cat_Lessthan25','race_random_African_American',
-            'race_random_Caucasian',
-            'sex_Female', 'sex_Male', 'c_charge_degree_M','c_charge_degree_F']
+        df = pd.read_csv(data_filepath)
 
-            X =  data_final.loc[:, independent_columns]
-            sns.set()
-            shap.summary_plot(shap_values.values, X)
+        p = figure()
+        shap_1 = df[df['group']==1].shap
+        shap_0 = df[df['group']==0].shap
+        perturb_1 = np.random.uniform(low=-0.05, high=0.05, size=(len(shap_1),))
+        perturb_0 = np.random.uniform(low=-0.05, high=0.05, size=(len(shap_0),))
+        p.scatter(x=shap_1, y=perturb_1, fill_color='red', legend_label='Underprivileged group')
+        p.scatter(x=shap_0,  y=perturb_0, fill_color='blue', legend_label='Privileged group')
+        p.xaxis.axis_label = "Shap Scores"
+        p.legend.click_policy="hide"
+        #show(p)
+        return components(p)
 
-            shap_values = pd.read_csv(os.path.join(my_path, "../data/compas_shap_normal_allfeatures.csv"))
-            independent_columns  = ['priors_count','age_cat_25_45', 'age_cat_Greaterthan45',
-            'age_cat_Lessthan25', 'race_African_American',
-            'race_Caucasian',
-            'sex_Female', 'sex_Male', 'c_charge_degree_M','c_charge_degree_F']
+    @staticmethod
+    def plot_shap_kdeplots(dataset):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
 
-            X =  data_final.loc[:, independent_columns]
+        df = pd.read_csv(data_filepath)
 
-            sns.set()
-            shap.summary_plot(shap_values.values, X)
+        #Non-randomized
+        Y_1_G1 =  df[(df['label']==0) & (df['group']==1)].index
+        Y_1_G0 =  df[(df['label']==0) & (df['group']==0)].index
+        Y_0_G1 =  df[(df['label']==1) & (df['group']==1)].index
+        Y_0_G0 =  df[(df['label']==1) & (df['group']==0)].index
 
-        elif dataset == "adult":
-            shap_values = pd.read_csv(os.path.join(my_path, "../data/adult_shap_random_allfeatures.csv"))
-            data_final = pd.read_csv(os.path.join(my_path, "../data/adult_processed.csv"))
-            independent_columns  = list(data_final)
+        #Showing violation of eq odds for Y=1 and both groups
+        plt.figure()
+        sns.kdeplot(df.loc[Y_1_G1, 'shap'], label = 'Group 1 (underprivileged) and Y = 1 (positive outcome)', color='blue')
+        sns.kdeplot(df.loc[Y_1_G0, 'shap'], label = 'Group 0 (privileged) and Y = 1 (positive outcome)', color='orange')
+        plt.legend()
+        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y1_normal.png")
+        plt.savefig(image_filepath)
 
-            X =  data_final.loc[:, independent_columns]
+        #Showing violation of eq odds for Y=0 and both groups
+        plt.figure()
+        sns.kdeplot(df.loc[Y_0_G1, 'shap'], label = 'Group 1 (underprivileged) and Y = 0 (negative outcome)', color='blue')
+        sns.kdeplot(df.loc[Y_0_G0, 'shap'], label = 'Group 0 (privileged) and Y = 0 (negative outcome)', color='orange')
+        plt.legend()
+        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y0_normal.png")
+        plt.savefig(image_filepath)
 
-            sns.set()
-            shap.summary_plot(shap_values.values, X, max_display=shap_values.shape[1])
+        #Introduce randomization fo groups
+        df['group_random'] = np.random.permutation(df['group'])
+
+        Y_1_G1_rand =  df[(df['label']==0) & (df['group_random']==1)].index
+        Y_1_G0_rand =  df[(df['label']==0) & (df['group_random']==0)].index
+        Y_0_G1_rand =  df[(df['label']==1) & (df['group_random']==1)].index
+        Y_0_G0_rand =  df[(df['label']==1) & (df['group_random']==0)].index
+
+        #Showing adherence to eq odds for Y=1 and both groups
+        plt.figure()
+        sns.kdeplot(df.loc[Y_1_G1_rand, 'shap'], label = 'Randomized Group 1 (underprivileged) and Y = 1 (positive outcome)', color='blue')
+        sns.kdeplot(df.loc[Y_1_G0_rand, 'shap'], label = 'Randomized Group 0 (privileged) and Y = 1 (positive outcome)', color='orange')
+        plt.legend()
+        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y1_random.png")
+        plt.savefig(image_filepath)
+
+        #Showing adherence to eq odds for Y=0 and both groups
+        plt.figure()
+        sns.kdeplot(df.loc[Y_0_G1_rand, 'shap'], label = 'Randomized Group 1 (underprivileged) and Y = 0 (negative outcome)', color='blue')
+        sns.kdeplot(df.loc[Y_0_G0_rand, 'shap'], label = 'Randomized Group 0 (privileged) and Y = 0 (negative outcome)', color='orange')        
+        plt.legend()
+        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y0_random.png")
+        plt.savefig(image_filepath)
+        
 
 class Model(namedtuple('Model', 'id shap pred label')):
   

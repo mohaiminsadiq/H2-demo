@@ -109,10 +109,21 @@
     </table>
 
     <h1> Calibrated Equalized Odds Instance Selection</h1>
-    {{ bokeh_plot | safe }}
+    {{ bokeh_plot_eq_odds | safe }}
 
-    {{ bokeh_src | safe }}
+    {{ bokeh_src_eq_odds | safe }}
 
+    <h1> Shap Detection</h1>
+    {{ bokeh_plot_shap | safe }}
+
+    {{ bokeh_src_shap | safe }}
+
+
+    <img src="/static/images/eq_odds_y1_normal.png">
+    <img src="/static/images/eq_odds_y0_normal.png">
+    <img src="/static/images/eq_odds_y1_random.png">
+    <img src="/static/images/eq_odds_y0_random.png">
+    <!-- <img src={{url_for('static', filename='images/eq_odds_y1_normal.png')}}> -->
     </div>
 
 {% endblock %}

@@ -72,7 +72,9 @@ def results():
 
 @app.route('/testing')
 def testing():
-    dataset = 'adult'
+    dataset = 'compas'
+
+    ShapModel.plot_shap_kdeplots(dataset)
 
     shap_model_false = ShapModel()
     shap_model_false.equalized_odds_shap(dataset, shap_enabled=False)
@@ -108,13 +110,14 @@ def testing():
     # calib_eq_odds_results_group_1 = {"Original group 1 model":shap_model_true.group_1_test_model.results_dict(),
     # "Calibrated Equalized odds group 1 model": shap_model_true.calib_eq_odds_group_1_test_model.results_dict()}
 
-    src, div = ShapModel.drawBokehGraph(dataset, shap_model_true.calib_eq_odds_group_0_test_model, shap_model_true.calib_eq_odds_group_1_test_model, 
+    src_eq_odds, div_eq_odds = ShapModel.draw_shap_calib_eq_odds_plot(dataset, shap_model_true.calib_eq_odds_group_0_test_model, shap_model_true.calib_eq_odds_group_1_test_model, 
     shap_model_false.calib_eq_odds_group_0_test_model, shap_model_false.calib_eq_odds_group_1_test_model)
-
     
+    src_shap_plot, div_shap_plot = ShapModel.plot_shap_summaryplot(dataset)
+
     return render_template('shap_test.html', eq_odds_results_group_0=eq_odds_results_group_0, eq_odds_results_group_1=eq_odds_results_group_1,
 calib_eq_odds_results_group_0=calib_eq_odds_results_group_0, calib_eq_odds_results_group_1=calib_eq_odds_results_group_1,
-bokeh_plot=div, bokeh_src=src)
+bokeh_plot_eq_odds=div_eq_odds, bokeh_src_eq_odds=src_eq_odds, bokeh_plot_shap=div_shap_plot, bokeh_src_shap=src_shap_plot)
 
 @app.after_request
 def add_header(r):
