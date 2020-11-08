@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<!-- Note: this stylesheet is changing rows to columns for the html tables -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/shap_test.css') }}">
+{% endblock %}
+
+{% block content %} 
+    <div class="container">
+    <h2>Randomized Equalized Odds</h2>
+
+    <table>
+    {% for key, value in eq_odds_results_group_0.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Metrics/Dataset</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in eq_odds_results_group_0.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <br />
+
+
+    <table>
+    {% for key, value in eq_odds_results_group_1.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Metrics/Dataset</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in eq_odds_results_group_1.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <br />
+    <h2>Randomized Calibrated Equalized Odds</h2>
+    <table>
+    {% for key, value in calib_eq_odds_results_group_0.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Metrics/Dataset</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in calib_eq_odds_results_group_0.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <br />
+
+    <table>
+        {% for key, value in calib_eq_odds_results_group_1.items() %}
+        {% if loop.index==1 %}
+            <tr>
+                <td>Metrics/Dataset</td>
+            {% for key1, value1 in value.items() %}
+                <td>  {{key1}}  </td> 
+            {% endfor %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    
+        <!-- Print the data -->
+        {% for key, value in calib_eq_odds_results_group_1.items() %}
+            <tr>
+                <td> {{ key }}</td>
+            {% for key1, value1 in value.items() %}
+                <td> {{value1}} </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+    <h1> Calibrated Equalized Odds Instance Selection</h1>
+    {{ bokeh_plot | safe }}
+
+    {{ bokeh_src | safe }}
+
+    </div>
+
+{% endblock %}

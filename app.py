@@ -1,4 +1,5 @@
 from python_util import randomBar
+from python_util.modules.ShapModel import ShapModel
 
 from flask import Flask, render_template, request, redirect, url_for, make_response
 app = Flask(__name__)
@@ -69,7 +70,51 @@ def results():
                                 bokeh_plot=div,
                                 bokeh_src=src)
 
+@app.route('/testing')
+def testing():
+    dataset = 'adult'
 
+    shap_model_false = ShapModel()
+    shap_model_false.equalized_odds_shap(dataset, shap_enabled=False)
+
+    eq_odds_results_group_0 = {"Original group 0 model":shap_model_false.group_0_test_model.results_dict(),
+    "Equalized odds group 0 model": shap_model_false.eq_odds_group_0_test_model.results_dict()}
+
+    eq_odds_results_group_1 = {"Original group 1 model":shap_model_false.group_1_test_model.results_dict(),
+    "Equalized odds group 1 model": shap_model_false.eq_odds_group_1_test_model.results_dict()}
+
+    shap_model_false.calibrated_equalized_odds_shap(dataset, 'weighted', shap_enabled=False)
+
+    calib_eq_odds_results_group_0 = {"Original group 0 model":shap_model_false.group_0_test_model.results_dict(),
+    "Calibrated Equalized odds group 0 model": shap_model_false.calib_eq_odds_group_0_test_model.results_dict()}
+
+    calib_eq_odds_results_group_1 = {"Original group 1 model":shap_model_false.group_1_test_model.results_dict(),
+    "Calibrated Equalized odds group 1 model": shap_model_false.calib_eq_odds_group_1_test_model.results_dict()}
+
+    shap_model_true = ShapModel()
+    shap_model_true.equalized_odds_shap(dataset, shap_enabled=True)
+
+    # eq_odds_results_group_0 = {"Original group 0 model":shap_model_true.group_0_test_model.results_dict(),
+    # "Equalized odds group 0 model": shap_model_true.eq_odds_group_0_test_model.results_dict()}
+
+    # eq_odds_results_group_1 = {"Original group 1 model":shap_model_true.group_1_test_model.results_dict(),
+    # "Equalized odds group 1 model": shap_model_true.eq_odds_group_1_test_model.results_dict()}
+
+    shap_model_true.calibrated_equalized_odds_shap(dataset, 'weighted', shap_enabled=True)
+
+    # calib_eq_odds_results_group_0 = {"Original group 0 model":shap_model_true.group_0_test_model.results_dict(),
+    # "Calibrated Equalized odds group 0 model": shap_model_true.calib_eq_odds_group_0_test_model.results_dict()}
+
+    # calib_eq_odds_results_group_1 = {"Original group 1 model":shap_model_true.group_1_test_model.results_dict(),
+    # "Calibrated Equalized odds group 1 model": shap_model_true.calib_eq_odds_group_1_test_model.results_dict()}
+
+    src, div = ShapModel.drawBokehGraph(dataset, shap_model_true.calib_eq_odds_group_0_test_model, shap_model_true.calib_eq_odds_group_1_test_model, 
+    shap_model_false.calib_eq_odds_group_0_test_model, shap_model_false.calib_eq_odds_group_1_test_model)
+
+    
+    return render_template('shap_test.html', eq_odds_results_group_0=eq_odds_results_group_0, eq_odds_results_group_1=eq_odds_results_group_1,
+calib_eq_odds_results_group_0=calib_eq_odds_results_group_0, calib_eq_odds_results_group_1=calib_eq_odds_results_group_1,
+bokeh_plot=div, bokeh_src=src)
 
 @app.after_request
 def add_header(r):
