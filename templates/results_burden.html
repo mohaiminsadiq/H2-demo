@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+{% block content %}
+<style>
+h1 {text-align: center;}
+
+p {text-align: center;}
+
+.centered{
+      display : block;
+      margin : 0 auto;
+      text-align: center;
+      width: 800px;
+      }
+
+</style>
+
+<h1> Burden Plot </h1>
+<div class="centered">
+    {{ burden_plt | safe }}
+    {{ burden_src | safe }}
+</div>
+<div class="centered">
+    {{ scat_plt | safe }}
+    {{ scat_src | safe }}
+</div>
+<p> 
+Burden is a blah blah blah blah
+</p>
+
+<h1> Demographic Parity </h1>
+<div class="centered">
+    {{ demo_plt | safe }}
+    {{ demo_src | safe }}
+</div>
+<p>
+Demographic Parity is blah blah blah
+</p>
+
+
+{% endblock %}

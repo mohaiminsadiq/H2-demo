@@ -1,7 +1,9 @@
-from python_util import randomBar
+from python_util.API import API
 from python_util.modules.ShapModel import ShapModel
 
 from flask import Flask, render_template, request, redirect, url_for, make_response
+from bokeh.embed import components
+
 app = Flask(__name__)
 
 @app.route('/bokeh_self_check', methods=['POST', 'GET'])
@@ -53,12 +55,10 @@ def method():
 
 @app.route('/results', methods=['POST', 'GET'])
 def results():
-    method = request.cookies.get('method')
-    dataset = request.cookies.get('dataset')
+    method = request.cookies.get('method').lower()
+    dataset = request.cookies.get('dataset').lower()
     if method is None or dataset is None:
         return render_template('result_error.html')
-    src, div = randomBar.get_bokeh_chart(method,
-                                         dataset)
     if request.method == 'POST':
         if request.form['submit_button'] == 'Go back':
             return redirect(url_for('method'))
@@ -66,9 +66,20 @@ def results():
             pass
             #return redirect(url_for(''))
     else:
-        return render_template('bokeh_test.html',
-                                bokeh_plot=div,
-                                bokeh_src=src)
+        graph_handle = API(debias_method=method, dataset=dataset)
+        if method == 'burden':
+            burden_plt, burden_src = components(graph_handle.get_repr_graph())
+            demo_plt, demo_src = components(graph_handle.get_demoParity_graph())
+            scatter_plt, scatter_src = components(graph_handle.get_scatter_plot())
+            return render_template('results_burden.html',
+                                    burden_plt=burden_plt,
+                                    burden_src=burden_src,
+                                    demo_plt=demo_plt,
+                                    demo_src=demo_src,
+                                    scat_plt=scatter_plt,
+                                    scat_src=scatter_src)
+        else:
+            return render_template('results_shap.html')
 
 @app.route('/testing')
 def testing():

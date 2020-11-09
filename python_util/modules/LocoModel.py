@@ -1,3 +1,4 @@
+from collections import namedtuple
 import cvxpy as cvx
 import numpy as np
 import pandas as pd
@@ -19,15 +20,15 @@ def pair_wise_avg(iter):
             ret.append((obj[0] + obj[1])/2)
         return ret
 
-class BurdenModel:
+class LocoModel:
 
-    def burden_val_test_split(self, dataset):
+    def loco_val_test_split(self, dataset):
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
         if dataset == 'compas':
-            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
-            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
 
         test_and_val_data = pd.read_csv(data_filepath)
         test_and_val_data.index = test_and_val_data.id
@@ -45,60 +46,60 @@ class BurdenModel:
         group_0_test_data = test_data[test_data['group'] == 0]
         group_1_test_data = test_data[test_data['group'] == 1]
 
-        self.group_0_val_model = Model(group_0_val_data)
-        self.group_1_val_model = Model(group_1_val_data)
-        self.group_0_test_model = Model(group_0_test_data)
-        self.group_1_test_model = Model(group_1_test_data)
+        self.group_0_val_model = Model(group_0_val_data['prediction'], group_0_val_data['label'], group_0_val_data['loco'])
+        self.group_1_val_model = Model(group_1_val_data['prediction'], group_1_val_data['label'], group_1_val_data['loco'])
+        self.group_0_test_model = Model(group_0_test_data['prediction'], group_0_test_data['label'], group_0_test_data['loco'])
+        self.group_1_test_model = Model(group_1_test_data['prediction'], group_1_test_data['label'], group_1_test_data['loco'])
 
 
-    def equalized_odds_burden(self, dataset):
-        self.burden_val_test_split(dataset)
+    def equalized_odds_loco(self, dataset):
+        self.loco_val_test_split(dataset)
 
         # Find mixing rates for equalized odds models
-        _, _, mix_rates = Model.burden_eq_odds(self.group_0_val_model, self.group_1_val_model)
+        _, _, mix_rates = Model.loco_eq_odds(self.group_0_val_model, self.group_1_val_model)
 
         # Apply the mixing rates to the test models
-        self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model = Model.burden_eq_odds(self.group_0_test_model,
+        self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model = Model.loco_eq_odds(self.group_0_test_model,
                                                                                 self.group_1_test_model, 
                                                                                 mix_rates)
 
         return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model
 
-    def equalized_odds_part_burden(self, dataset):
-        self.burden_val_test_split(dataset)
+    def equalized_odds_part_loco(self, dataset):
+        self.loco_val_test_split(dataset)
 
         # Find mixing rates for equalized odds models
-        _, _, mix_rates = Model.burden_eq_opp(self.group_0_val_model, self.group_1_val_model)
+        _, _, mix_rates = Model.loco_eq_opp(self.group_0_val_model, self.group_1_val_model)
 
         # Apply the mixing rates to the test models
-        self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model = Model.burden_eq_opp(self.group_0_test_model,
+        self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model = Model.loco_eq_opp(self.group_0_test_model,
                                                                                 self.group_1_test_model, 
                                                                                 mix_rates)
 
         return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model
 
     
-    def get_burden_scatter(self, dataset):
+    def get_loco_scatter(self, dataset):
         my_path = os.path.abspath(os.path.dirname(__file__))
         if dataset == 'compas':
-            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
-            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
 
         full_data = pd.read_csv(data_filepath)
         
-        g0_burden = 1/full_data[full_data['group'] == 0].fitness
-        g0_wiggle = 0.5*np.sin(np.arange(g0_burden.shape[0])) + .5
+        g0_loco = full_data[full_data['group'] == 0].loco
+        g0_wiggle = 0.5*np.sin(np.arange(g0_loco.shape[0])) + .5
         
-        g1_burden = 1/full_data[full_data['group'] == 1].fitness
-        g1_wiggle = 0.5 * np.sin(np.arange(g1_burden.shape[0])) + .5
+        g1_loco = full_data[full_data['group'] == 1].loco
+        g1_wiggle = 0.5 * np.sin(np.arange(g1_loco.shape[0])) + .5
         g1_offset = (g1_wiggle)+2
-        data = {'x':g1_burden, 'y':g1_offset}
+        data = {'x':g1_loco, 'y':g1_offset}
         source = ColumnDataSource(data)
         
         p = figure( plot_height=200, 
                     plot_width=400,
-                    title="Burden between two groups")#Plotting
+                    title="loco between two groups")#Plotting
         p.circle(y='y',                            #categories
                x='x',
                source=source, #bar heights
@@ -110,7 +111,7 @@ class BurdenModel:
           )#Signing the axis
           
         p.circle(y=g0_wiggle,                            #categories
-               x=g0_burden,                      #bar heights
+               x=g0_loco,                      #bar heights
                width = .9,
                fill_alpha = .5,
                fill_color = 'blue',
@@ -119,7 +120,7 @@ class BurdenModel:
           )#Signing the axis
         
         hline = Span(location=0, dimension='width', line_color='black', line_width=1)
-        p.yaxis.axis_label='Delta Burden'
+        p.yaxis.axis_label='Delta loco'
         
         p.sizing_mode = 'scale_width'
         p.legend.click_policy = "hide"
@@ -147,37 +148,36 @@ class BurdenModel:
         
         return row(column(slider, width=100), p)
     
-    def get_burden_graph(self, dataset): 
+    def get_loco_graph(self, dataset): 
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
         if dataset == 'compas':
-            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
-            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
 
         full_data = pd.read_csv(data_filepath)
-
-        years = [0]
-        values = [(1/full_data[full_data['group'] == 0].fitness).mean()-
-                  (1/full_data[full_data['group'] == 1].fitness).mean()]
+        
+        years = [0, 1]
+        values = [(full_data[full_data['group'] == 0].loco).mean(),
+                  (full_data[full_data['group'] == 1].loco).mean()]
         
         p = figure( plot_height=200, 
                     plot_width=400,
-                    title="Burden between two groups")#Plotting
+                    title="loco between two groups")#Plotting
         p.vbar(years,                            #categories
-              top = values,                      #bar heights
+               top = values,                      #bar heights
                width = .9,
                fill_alpha = .5,
-               fill_color = ['blue'],
+               fill_color = ['blue', 'red'],
                line_alpha = .5,
                line_color='green',
                line_dash='solid',              
           )#Signing the axis
         
-        p.y_range = Range1d(-abs(values[0])*1.1, abs(values[0])*1.1)
         hline = Span(location=0, dimension='width', line_color='black', line_width=1)
         p.renderers.extend([hline])
-        p.yaxis.axis_label='Delta Burden'
+        p.yaxis.axis_label='loco score'
         
         labels = ['Group 1', 'Group 0']
         y_tick_locs = (-abs(values[0]), abs(values[0]))
@@ -198,34 +198,31 @@ class BurdenModel:
         
         return p
                
-    def get_burden_demoParity(self, dataset): 
+    def get_loco_demoParity(self, dataset): 
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
         if dataset == 'compas':
-            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
-            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
 
         full_data = pd.read_csv(data_filepath)
         
-        _, _, g0, g1 = self.equalized_odds_burden(dataset)
-        _, _, pg0, pg1 = self.equalized_odds_part_burden(dataset)
+        _, _, g0, g1 = self.equalized_odds_loco(dataset)
         
         width = .35
         padd = .45
         
-        x_1 = [width, width*2+padd, width*3+padd*2]
-        x_0 = [0, width+padd, width*2+padd*2]
+        x_1 = [width, width*2+padd]
+        x_0 = [0, width+padd]
         values_1 = [
                   full_data[(full_data['group'] == 1) & (full_data['label'] == 1)].prediction.round().mean(),
-                  g1.datadf[g1.datadf['label'] == 1].prediction.round().mean(),
-                  pg1.datadf[pg1.datadf['label'] == 1].prediction.round().mean()
+                  g1.pred.round().mean(),
                   ]
         values_0 = [full_data[(full_data['group'] == 0) & (full_data['label'] == 1)].prediction.round().mean(),
-                    g0.datadf[g0.datadf['label'] == 1].prediction.round().mean(),
-                    pg0.datadf[pg0.datadf['label'] == 1].prediction.round().mean()
+                    g0.pred.round().mean(),
         ]
-        labels = ['default', 'burden', 'partial burden']
+        labels = ['default', 'loco']
         p = figure( plot_height=200, 
                     plot_width=400,
                     title="Demographic Parity")#Plotting
@@ -289,16 +286,8 @@ class BurdenModel:
     def plot_shap_summaryplot(dataset):
         pass
 
-class Model:
-    
-    def __init__(self, datadf):
-        self.pred = datadf['prediction'].copy()
-        self.label = datadf['label'].copy()
-        self.label = datadf['label'].copy()
-        self.datadf = datadf.copy()
-        self.datadf['cfact_dist'] = 1/datadf['fitness']
-        self.datadf = self.datadf.query("cfact_dist == cfact_dist")
-                    
+
+class Model(namedtuple('Model', 'pred label loco')):
     def logits(self):
         raw_logits = np.clip(np.log(self.pred / (1 - self.pred)), -100, 100)
         return raw_logits
@@ -359,155 +348,103 @@ class Model:
 
     def accuracies(self):
         return self.pred.round() == self.label
-    
-    def get_burden(self):
-        return self.datadf['cfact_dist'].mean()
 
-    def burden_eq_opp(self, othr, mix_rates=None):
+    def loco_eq_odds(self, othr, mix_rates=None):
         has_mix_rates = not (mix_rates is None)
         if not has_mix_rates:
             mix_rates = self.eq_odds_optimal_mix_rates(othr)
         sp2p, sn2p, op2p, on2p = tuple(mix_rates)
-                   
-        print(1-sp2p, sn2p, 1-op2p, on2p, "pburden")
-        # find indices close to the border and flip them
-        if self.get_burden() > othr.get_burden():
-            burdened_predictor = "self"
-        else:
-            burdened_predictor = "other"
-        
-        if burdened_predictor is "other":
-            priv_df = self.datadf.copy()
-            disa_df = othr.datadf.copy()
-            priv_n2p = sn2p[0]
-            disa_n2p = on2p[0]
-        else:
-            priv_df = othr.datadf.copy()
-            disa_df = self.datadf.copy()
-            priv_n2p = on2p[0]
-            disa_n2p = sn2p[0]
                 
-        priv_neg = priv_df[priv_df['prediction'].round() == 0]
-        disa_neg = disa_df[disa_df['prediction'].round() == 0]
+        self_data = pd.DataFrame({'loco': self.loco, 'pred': self.pred, 'label': self.label})
                 
-        num_priv_n2p = int(priv_n2p * priv_df.shape[0]) 
-        priv_ind = np.asarray(priv_neg.sort_values('cfact_dist', ascending = True).id)[:num_priv_n2p]     
-        num_disa_n2p = int(disa_n2p * disa_df.shape[0]) 
-        disa_ind = np.asarray(disa_neg.sort_values('cfact_dist', ascending = True).id)[:num_disa_n2p]
-
-
-        priv_df.loc[priv_ind, "prediction"] = 1 - priv_df.loc[priv_ind, "prediction"]
-        disa_df.loc[disa_ind, "prediction"] = 1 - disa_df.loc[disa_ind, "prediction"]
+        self_data['outcome'] = self_data['pred'].round()
+        self_original_pos = self_data[self_data['outcome'] == 1]
+        self_original_neg = self_data[self_data['outcome'] == 0]
         
-        fair_self = None
-        fair_othr = None
+        other_data = pd.DataFrame({'loco': othr.loco, 'pred': othr.pred, 'label': othr.label})
                 
-        if burdened_predictor is "other":
-            fair_self = Model(priv_df)
-            fair_othr = Model(disa_df)
-        else:
-            fair_self = Model(disa_df)
-            fair_othr = Model(priv_df)
-                            
-        if not has_mix_rates:
-            return fair_self, fair_othr, mix_rates
-        else:
-            return fair_self, fair_othr
-    
-    def burden_eq_odds(self, othr, mix_rates=None):
-        has_mix_rates = not (mix_rates is None)
-        if not has_mix_rates:
-            mix_rates = self.eq_odds_optimal_mix_rates(othr)
-        sp2p, sn2p, op2p, on2p = tuple(mix_rates)
-                   
-        print(1-sp2p, sn2p, 1-op2p, on2p, "burden")
-        # find indices close to the border and flip them
-        if self.get_burden() > othr.get_burden():
-            burdened_predictor = "self"
-        else:
-            burdened_predictor = "other"
+        other_data['outcome'] = other_data['pred'].round()
+        other_original_pos = other_data[other_data['outcome'] == 1]
+        other_original_neg = other_data[other_data['outcome'] == 0]
         
-        if burdened_predictor is "self":
-            priv_df = self.datadf
-            disa_df = othr.datadf
-        else:
-            priv_df = othr.datadf
-            disa_df = self.datadf
+        # find indices with high loco score in race to flip
+        # people with high race loco should be moved to the negative class as its artificlially pushing them positive
+        num_sp2n= int(self_original_pos.shape[0] *  (1 - sp2p))
+        self_original_pos['pred_except_race_loco'] = self_original_pos['pred']-self_original_pos['loco']
+        sp2n_indices = np.asarray(self_original_pos.sort_values('pred_except_race_loco', ascending = True).index[:num_sp2n])
         
-        self_df = self.datadf.copy(deep=True)
-        self_df_pos = self_df[self_df["prediction"].round() == 1]
-        self_df_neg = self_df[self_df["prediction"].round() == 0]
-        othr_df = othr.datadf.copy(deep=True)
-        othr_df_pos = othr_df[othr_df["prediction"].round() == 1]
-        othr_df_neg = othr_df[othr_df["prediction"].round() == 0]
-    
-            
-        num_sn2p = int(self_df.shape[0] *  (sn2p[0]))
-        sn2p_indices = np.asarray(self_df_neg.sort_values('cfact_dist', ascending = True).id)[:num_sn2p]
+        num_op2n= int(other_original_pos.shape[0] *  (1 - op2p))
+        other_original_pos['pred_except_race_loco'] = other_original_pos['pred']-other_original_pos['loco']
+        op2n_indices = np.asarray(other_original_pos.sort_values('pred_except_race_loco', ascending = True).index[:num_op2n])
+                
+        # flip those values
+        self_data.loc[sp2n_indices, 'pred'] = 1 - self_data.loc[sp2n_indices, 'pred']      
+        other_data.loc[op2n_indices, 'pred'] = 1 - other_data.loc[op2n_indices, 'pred']
         
-        num_on2p = int(othr_df.shape[0] *  (on2p[0]))
-        on2p_indices = np.asarray(othr_df_neg.sort_values('cfact_dist', ascending = True).id)[:num_on2p]
         
-        num_sp2n = int(self_df.shape[0] *  (1 - sp2p[0]))
-        sp2n_indices = np.asarray(self_df_pos.sort_values('cfact_dist', ascending = True).id)[:num_sp2n]
+        # find indices with highly negative loco score in race to flip
+        # people with highly negative race loco should be moved to the positive class as its artificlially pushing them negative
+        num_sn2p= int(self_original_pos.shape[0] *  (sn2p))
+        self_original_neg['pred_except_race_loco'] = self_original_neg['pred']-self_original_neg['loco']
+        sn2p_indices = np.asarray(self_original_neg.sort_values('pred_except_race_loco', ascending = False).index[:num_sn2p])
         
-        num_op2n = int(othr_df.shape[0] *  (1 - op2p[0]))
-        op2n_indices = np.asarray(othr_df_pos.sort_values('cfact_dist', ascending = True).id)[:num_op2n]
+        num_on2p= int(other_original_pos.shape[0] *  (on2p))
+        other_original_neg['pred_except_race_loco'] = other_original_neg['pred']-other_original_neg['loco']
+        on2p_indices = np.asarray(other_original_neg.sort_values('pred_except_race_loco', ascending = False).index[:num_on2p])
         
         # flip those values
-        self_df.loc[sn2p_indices, 'prediction'] = 1 - self_df.loc[sn2p_indices, 'prediction']      
-        self_df.loc[sp2n_indices, 'prediction'] = 1 - self_df.loc[sp2n_indices, 'prediction']      
+        self_data.loc[sn2p_indices, 'pred'] = 1 - self_data.loc[sn2p_indices, 'pred']      
+        other_data.loc[on2p_indices, 'pred'] = 1 - other_data.loc[on2p_indices, 'pred']
 
-        othr_df.loc[on2p_indices, 'prediction'] = 1 - othr_df.loc[on2p_indices, 'prediction']
-        othr_df.loc[op2n_indices, 'prediction'] = 1 - othr_df.loc[op2n_indices, 'prediction']      
-        
-        fair_self = Model(self_df)
-        fair_othr = Model(othr_df)
+        fair_self = Model(np.array(self_data['pred']), self.label, self.loco)
+        fair_othr = Model(np.array(other_data['pred']), othr.label, othr.loco)
 
         if not has_mix_rates:
             return fair_self, fair_othr, mix_rates
         else:
             return fair_self, fair_othr
-        
+    
     def eq_odds(self, othr, mix_rates=None):
         has_mix_rates = not (mix_rates is None)
         if not has_mix_rates:
             mix_rates = self.eq_odds_optimal_mix_rates(othr)
         sp2p, sn2p, op2p, on2p = tuple(mix_rates)
-        
+
         # select random indices to flip in our model
-        self_fair_pred = self.datadf.copy()
-        self_pp_indices = self_fair_pred[self_fair_pred["prediction"] >= .5]
-        self_pn_indices = self_fair_pred[self_fair_pred["prediction"] < .5]
-        self_pp_indices = self_pp_indices.sample(frac=(1-sp2p[0]))
-        self_pn_indices = self_pn_indices.sample(frac=sn2p[0])
-        
+        self_fair_pred = self.pred.copy()
+        self_pp_indices, = np.nonzero(self.pred.round())
+        self_pn_indices, = np.nonzero(1 - self.pred.round())
+        np.random.shuffle(self_pp_indices)
+        np.random.shuffle(self_pn_indices)
+
         # flip randomly the predictions in our model
-        self_fair_pred.loc[self_pn_indices.id] = 1 - self_fair_pred.loc[self_pn_indices.id]
-        self_fair_pred.loc[self_pp_indices.id] = 1 - self_fair_pred.loc[self_pp_indices.id]
+        n2p_indices = self_pn_indices[:int(len(self_pn_indices) * sn2p)]
+        self_fair_pred[n2p_indices] = 1 - self_fair_pred[n2p_indices]
+        p2n_indices = self_pp_indices[:int(len(self_pp_indices) * (1 - sp2p))]
+        self_fair_pred[p2n_indices] = 1 - self_fair_pred[p2n_indices]
 
         # select random indices to flip in the other model
-        othr_fair_pred = othr.datadf.copy()
-        othr_pp_indices = othr_fair_pred[othr_fair_pred["prediction"] >= .5]
-        othr_pn_indices = othr_fair_pred[othr_fair_pred["prediction"] < .5]
-        othr_pp_indices = othr_pp_indices.sample(frac=(1-op2p[0]))
-        othr_pn_indices = othr_pn_indices.sample(frac=on2p[0])
+        othr_fair_pred = othr.pred.copy()
+        othr_pp_indices, = np.nonzero(othr.pred.round())
+        othr_pn_indices, = np.nonzero(1 - othr.pred.round())
+        np.random.shuffle(othr_pp_indices)
+        np.random.shuffle(othr_pn_indices)
 
         # dlip randomly the precitions of the other model
-        othr_fair_pred.loc[othr_pn_indices.id] = 1 - othr_fair_pred.loc[othr_pn_indices.id]
-        othr_fair_pred.loc[othr_pp_indices.id] = 1 - othr_fair_pred.loc[othr_pp_indices.id]
+        n2p_indices = othr_pn_indices[:int(len(othr_pn_indices) * on2p)]
+        othr_fair_pred[n2p_indices] = 1 - othr_fair_pred[n2p_indices]
+        p2n_indices = othr_pp_indices[:int(len(othr_pp_indices) * (1 - op2p))]
+        othr_fair_pred[p2n_indices] = 1 - othr_fair_pred[p2n_indices]
 
         # create new model objects with the now fair predictions
-        
-        fair_self = Model(self_fair_pred)
-        fair_othr = Model(othr_fair_pred)
+        fair_self = Model(self_fair_pred, self.label, self.loco)
+        fair_othr = Model(othr_fair_pred, othr.label, othr.loco)
 
         if not has_mix_rates:
             return fair_self, fair_othr, mix_rates
         else:
-            return fair_self, fair_othr   
-        
-        
+            return fair_self, fair_othr
+
     def eq_odds_optimal_mix_rates(self, othr):
         sbr = float(self.base_rate())
         obr = float(othr.base_rate())
