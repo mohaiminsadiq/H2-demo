@@ -2,7 +2,7 @@ import cvxpy as cvx
 import numpy as np
 import pandas as pd
 from collections import namedtuple, Counter, OrderedDict
-from modules import ShapModel, BurdenModel
+from python_util.modules import ShapModel, BurdenModel, LocoModel
 from bokeh.plotting import figure, output_file, show
 
 
@@ -15,6 +15,8 @@ class API:
             self.model = ShapModel.ShapModel()
         elif self.method.lower() == "burden":
             self.model = BurdenModel.BurdenModel()
+        elif self.method.lower() == "loco":
+            self.model = LocoModel.LocoModel() 
         else:
             print(self.method.lower())
             raise ValueError()
@@ -24,18 +26,30 @@ class API:
             return self.model.equalized_odds_shap(self.dataset, True)
         elif self.method == "burden":
             return self.model.equalized_odds_burden(self.dataset)
+        elif self.method == "loco":
+            return self.model.equalized_odds_loco(self.dataset)
         else: 
             return None
             
     def get_repr_graph(self):
         if self.method == "burden":
             return self.model.get_burden_graph(self.dataset)
-         
+        elif self.method == "loco":
+            return self.model.get_loco_graph(self.dataset) 
         return None
             
     def get_demoParity_graph(self):
         if self.method == "burden":
             return self.model.get_burden_demoParity(self.dataset)
+        if self.method == "loco":
+            return self.model.get_loco_demoParity(self.dataset)
+        return None
+            
+    def get_scatter_plot(self):
+        if self.method == "burden":
+            return self.model.get_burden_scatter(self.dataset)
+        if self.method == "loco":
+            return self.model.get_loco_scatter(self.dataset)
         return None
             
     def get_conv_hulls():
@@ -51,18 +65,6 @@ class API:
         if self.method is "shap":
             return None
             raise ValueError
-
-if __name__ == "__main__":
-    api_s = API("shap")
-    api_b = API("burden")
-    
-    for x in api_b.get_model_results():
-        print (x)
-    for x in api_s.get_model_results():
-        print (x)
-        
-    show(api_b.get_repr_graph())
-    show(api_b.get_demoParity_graph())
 
         
     
