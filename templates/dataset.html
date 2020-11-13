@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block head %}
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/dataset.css') }}"> -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dataset.css') }}">
 {% endblock %}
 
 
@@ -9,7 +9,7 @@
   <h1>Team H2</h1>
   <p>Design of Unbiased Machine Learning Systems Demo</p> 
 </div>
-<div class=container>
+<!-- <div class=container>
     <form action="/dataset" method="POST">
         <div class="form-check">
             <p>Pick a dataset</p>
@@ -36,6 +36,50 @@
             <input type="submit" name="submit_button" value="Pick dataset" >
         </div>
     </form>
-</div>
+</div> -->
+
+<div class="container">
+    <h2 style="text-align: center;">Select a Dataset</h2>
+    <br />
+    
+        <div class="row">
+        <div class="col-md-4">
+            <div class="card card-1">
+            <form method="POST" action="/dataset">
+            <input type="hidden" name="dataset" value="COMPAS">
+            <h3>COMPAS</h3>
+            <p>Info about COMPAS</p>
+            <p>Info about COMPAS</p>
+            <button type="submit" name="submit_button" value="Pick dataset" class="stretched-link"></button>
+            </form>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-2">
+            <form method="POST" action="/dataset">
+            <input type="hidden" name="dataset" value="Census">
+            <h3>Adult Census</h3>
+            <p>Info about Adult Census</p>
+            <p>Info about Adult Census</p>
+            <button type="submit" name="submit_button" value="Pick dataset" class="stretched-link"></button>
+            </form>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card card-3">
+            <h3>Choose your own!</h3>
+            <p>Info about blah</p>
+            <p>Info about blah</p>
+            </div>
+        </div>
+        </div>
+
+    <form action="/dataset" method="POST">
+    <div class="row">
+        <input type="submit" name="submit_button" value="Go back" >
+    </div>
+    </form>
+  </div>
+  
 
 {% endblock %}

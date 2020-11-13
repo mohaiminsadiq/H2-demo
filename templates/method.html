@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 {% block head %}
-<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/dataset.css') }}"> -->
+<link rel="stylesheet" href="{{ url_for('static', filename='css/method.css') }}">
 {% endblock %}
 
 
@@ -9,7 +9,7 @@
   <h1>Team H2</h1>
   <p>Design of Unbiased Machine Learning Systems Demo</p> 
 </div>
-<div class="container">
+<!-- <div class="container">
     <form action="/method" method="POST">
         <div class="form-check">
             <p>Pick a Method</p>
@@ -35,6 +35,56 @@
             <input type="submit" name="submit_button" value="Pick method" >
         </div>
     </form>
-</div>
+</div> -->
+
+
+
+<div class="container">
+    <h2 style="text-align: center;">Select a Method</h2>
+    <br />
+    <div class="row">
+      <div class="col-md-4">
+        <div class="card card-1">
+          <form action="/method" method="POST">
+            <input type="hidden" name="method" value="SHAP">
+            <h3>SHAP</h3>
+            <p>Info about SHAP</p>
+            <p>Info about SHAP</p>
+            <button type="submit" name="submit_button" value="Pick method" class="stretched-link"></button>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-2">
+          <form action="/method" method="POST">
+            <input type="hidden" name="method" value="Burden">
+            <h3>Burden</h3>
+            <p>Info about Burden</p>
+            <p>Info about Burden</p>
+            <button type="submit" name="submit_button" value="Pick method" class="stretched-link"></button>
+          </form>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card card-3">
+          <form action="/method" method="POST">
+            <input type="hidden" name="method" value="LOCO">
+            <h3>LOCO</h3>
+            <p>Info about LOCO</p>
+            <p>Info about LOCO</p>
+            <button type="submit" name="submit_button" value="Pick method" class="stretched-link"></button>
+          </form>
+        </div>
+      </div>
+    </div>
+
+    <form action="/method" method="POST">
+        <div class="row">
+            <input type="submit" name="submit_button" value="Go back" >
+        </div>
+    </form>
+  </div>
+  
+  
 
 {% endblock %}
