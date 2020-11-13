@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% block head %}
 <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/dataset.css') }}"> -->
+<link rel="stylesheet" href="base.css">
 {% endblock %}
 
 {% block content %}
@@ -11,26 +12,44 @@
   
 <div class="container">
   <div class="row">
-    <div class="col-sm-4">
+    
+    <!--<div class="col-sm-4">
       <h3>XAI</h3>
       <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
       <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
-    </div>
+    </div>-->
     <div class="col-sm-4">
-      <h3>FairML</h3>
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+      <div class = "rcorners2">
+        <h3>XAI</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+      </div>
     </div>
+    
     <div class="col-sm-4">
-      <h3>Other good stuff</h3>        
-      <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
-      <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+      <div class = "rcorners2">
+        <h3>FairML</h3>
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+      </div>
+    </div>
+
+    <div class="col-sm-4">
+      <div class = "rcorners2">
+        <h3>Other good stuff</h3>        
+        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit...</p>
+        <p>Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris...</p>
+      </div>
+     </div>
+    
     </div>
   </div>
 </div>
 
 <form action="/" method="POST" style="text-align: center;">
-    <input type="submit" name="submit_button" value="Start Demo">
+    <div class = "floatButton">
+      <input type="submit" name="submit_button" value="Start Demo" class="inputForm" id="buttonHover">
+    </div>
 </form>
 
 {% endblock %}

@@ -2,3 +2,34 @@ body, html {
     /* height: 100%; */
     padding-top: 28px;
   }
+
+
+.rcorners2 {
+  border-radius: 25px;
+  /*border: 2px solid #73AD21;*/
+  padding: 20px;
+  width: auto;
+  height: auto;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
+.floatButton {
+  float:center;
+  margin-top : 50px;
+}
+
+.inputForm{
+  border-radius:5px;
+  -moz-border-radius:5px;
+  -webkit-border-radius:5px;
+  background-color:white;
+  /*border: 2px solid #73AD21;*/
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  width: 8em;  
+  height: 3em;
+}
+
+#buttonHover:hover{
+  background-color: #f9faf9;
+  color: #000000; /* SET COLOR IN BLACK */
+}
