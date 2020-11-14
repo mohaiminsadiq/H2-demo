@@ -3,16 +3,8 @@ table {
     border: 1px solid black;
 }
 
-table tr {
-	display: table-cell;
-}
-table tr td {
-	display: block;
-}
-
 td, th {
     border: 1px solid black;
     text-align: center;
     padding: 8px;
   }
-

@@ -30,7 +30,7 @@ body{
 
 .card-1{
   /* background-image: url(https://ionicframework.com/img/getting-started/ionic-native-card.png); */
-  background-image: url(../images/shap_logo.png); 
+  background-image: url(../images/logos/shap_logo.png); 
       background-repeat: no-repeat;
     background-position: right;
     background-size: 80px;
@@ -38,14 +38,15 @@ body{
 
 .card-2{
    /* background-image: url(https://ionicframework.com/img/getting-started/components-card.png); */
-   background-image: url(../images/burden_logo.jpeg); 
+   background-image: url(../images/logos/burden_logo.jpeg); 
       background-repeat: no-repeat;
     background-position: right;
     background-size: 80px;
 }
 
 .card-3{
-   background-image: url(https://ionicframework.com/img/getting-started/theming-card.png);
+   /* background-image: url(https://ionicframework.com/img/getting-started/theming-card.png); */
+  background-image: url(../images/logos/loco_logo.png); 
       background-repeat: no-repeat;
     background-position: right;
     background-size: 80px;

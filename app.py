@@ -78,57 +78,50 @@ def results():
                                     demo_src=demo_src,
                                     scat_plt=scatter_plt,
                                     scat_src=scatter_src)
-        else:
-            return render_template('results_shap.html')
+        elif method == 'shap':
+            #detection
+            shap_plt, shap_src = components(graph_handle.get_repr_graph())
+            graph_handle.get_demoParity_graph()
+            graph_handle.get_eq_odds_graphs()
 
-@app.route('/testing')
-def testing():
-    dataset = 'compas'
+            #mitigation, this needs two API objects
 
-    ShapModel.plot_shap_kdeplots(dataset)
+            #Randomized regular and calibrated equalized odds
+            randomized_model = API(debias_method=method, dataset=dataset)
 
-    shap_model_false = ShapModel()
-    shap_model_false.equalized_odds_shap(dataset, shap_enabled=False)
+            randomized_model.get_model_results(calibrated=False, shap_enabled=False)
+            randomized_model.get_model_results(calibrated=True, shap_enabled=False)
 
-    eq_odds_results_group_0 = {"Original group 0 model":shap_model_false.group_0_test_model.results_dict(),
-    "Equalized odds group 0 model": shap_model_false.eq_odds_group_0_test_model.results_dict()}
+            rand_eo_g0, rand_eo_g1, rand_ceo_g0, rand_ceo_g1 = randomized_model.model.dicts_compiler()
 
-    eq_odds_results_group_1 = {"Original group 1 model":shap_model_false.group_1_test_model.results_dict(),
-    "Equalized odds group 1 model": shap_model_false.eq_odds_group_1_test_model.results_dict()}
+            #Shap-based regular and calibrated equalized odds
+            shap_model = API(debias_method=method, dataset=dataset)
 
-    shap_model_false.calibrated_equalized_odds_shap(dataset, 'weighted', shap_enabled=False)
+            shap_model.get_model_results(calibrated=False, shap_enabled=True)
+            shap_model.get_model_results(calibrated=True, shap_enabled=True)
 
-    calib_eq_odds_results_group_0 = {"Original group 0 model":shap_model_false.group_0_test_model.results_dict(),
-    "Calibrated Equalized odds group 0 model": shap_model_false.calib_eq_odds_group_0_test_model.results_dict()}
+            shap_eo_g0, shap_eo_g1, shap_ceo_g0, shap_ceo_g1 = shap_model.model.dicts_compiler()
 
-    calib_eq_odds_results_group_1 = {"Original group 1 model":shap_model_false.group_1_test_model.results_dict(),
-    "Calibrated Equalized odds group 1 model": shap_model_false.calib_eq_odds_group_1_test_model.results_dict()}
+            calib_eq_odds_plt, calib_eq_odds_src = components(graph_handle.get_calib_eq_odds_graph(shap_model.model.calib_eq_odds_group_0_test_model, shap_model.model.calib_eq_odds_group_1_test_model, 
+            randomized_model.model.calib_eq_odds_group_0_test_model, randomized_model.model.calib_eq_odds_group_1_test_model))
+            # demo_plt, demo_src = components(graph_handle.get_demoParity_graph())
+            # scatter_plt, scatter_src = components(graph_handle.get_scatter_plot())
 
-    shap_model_true = ShapModel()
-    shap_model_true.equalized_odds_shap(dataset, shap_enabled=True)
-
-    # eq_odds_results_group_0 = {"Original group 0 model":shap_model_true.group_0_test_model.results_dict(),
-    # "Equalized odds group 0 model": shap_model_true.eq_odds_group_0_test_model.results_dict()}
-
-    # eq_odds_results_group_1 = {"Original group 1 model":shap_model_true.group_1_test_model.results_dict(),
-    # "Equalized odds group 1 model": shap_model_true.eq_odds_group_1_test_model.results_dict()}
-
-    shap_model_true.calibrated_equalized_odds_shap(dataset, 'weighted', shap_enabled=True)
-
-    # calib_eq_odds_results_group_0 = {"Original group 0 model":shap_model_true.group_0_test_model.results_dict(),
-    # "Calibrated Equalized odds group 0 model": shap_model_true.calib_eq_odds_group_0_test_model.results_dict()}
-
-    # calib_eq_odds_results_group_1 = {"Original group 1 model":shap_model_true.group_1_test_model.results_dict(),
-    # "Calibrated Equalized odds group 1 model": shap_model_true.calib_eq_odds_group_1_test_model.results_dict()}
-
-    src_eq_odds, div_eq_odds = ShapModel.draw_shap_calib_eq_odds_plot(dataset, shap_model_true.calib_eq_odds_group_0_test_model, shap_model_true.calib_eq_odds_group_1_test_model, 
-    shap_model_false.calib_eq_odds_group_0_test_model, shap_model_false.calib_eq_odds_group_1_test_model)
-    
-    src_shap_plot, div_shap_plot = ShapModel.plot_shap_summaryplot(dataset)
-
-    return render_template('shap_test.html', eq_odds_results_group_0=eq_odds_results_group_0, eq_odds_results_group_1=eq_odds_results_group_1,
-calib_eq_odds_results_group_0=calib_eq_odds_results_group_0, calib_eq_odds_results_group_1=calib_eq_odds_results_group_1,
-bokeh_plot_eq_odds=div_eq_odds, bokeh_src_eq_odds=src_eq_odds, bokeh_plot_shap=div_shap_plot, bokeh_src_shap=src_shap_plot)
+            return render_template('results_shap.html',
+                                    shap_plt=shap_plt,
+                                    shap_src=shap_src,
+                                    rand_eq_odds_results_group_0 = rand_eo_g0,
+                                    rand_eq_odds_results_group_1 = rand_eo_g1,
+                                    rand_calib_eq_odds_results_group_0 = rand_ceo_g0, 
+                                    rand_calib_eq_odds_results_group_1 = rand_ceo_g1,
+                                    shap_eq_odds_results_group_0 = shap_eo_g0,
+                                    shap_eq_odds_results_group_1 = shap_eo_g1,
+                                    shap_calib_eq_odds_results_group_0 = shap_ceo_g0, 
+                                    shap_calib_eq_odds_results_group_1 = shap_ceo_g1,
+                                    calib_eq_odds_plt=calib_eq_odds_plt,
+                                    calib_eq_odds_src=calib_eq_odds_src)
+        elif method == 'loco':
+            return render_template('results_loco.html')
 
 @app.after_request
 def add_header(r):

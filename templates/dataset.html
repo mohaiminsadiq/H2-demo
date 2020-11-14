@@ -48,8 +48,10 @@
             <form method="POST" action="/dataset">
             <input type="hidden" name="dataset" value="COMPAS">
             <h3>COMPAS</h3>
-            <p>Info about COMPAS</p>
-            <p>Info about COMPAS</p>
+            <p>Protected attribute: Race</p>
+            <p>Group 0 (Advantaged) : <br />Caucasian <br />
+                Group 1 (Disadvantaged) : <br />African American</p>
+            <p>Label: Recidivism</p>
             <button type="submit" name="submit_button" value="Pick dataset" class="stretched-link"></button>
             </form>
             </div>
@@ -57,18 +59,20 @@
         <div class="col-md-4">
             <div class="card card-2">
             <form method="POST" action="/dataset">
-            <input type="hidden" name="dataset" value="Census">
+            <input type="hidden" name="dataset" value="Adult">
             <h3>Adult Census</h3>
-            <p>Info about Adult Census</p>
-            <p>Info about Adult Census</p>
+            <p>Protected attribute: Sex</p>
+            <p>Group 0 (Advantaged) : <br />Male <br />
+                Group 1 (Disadvantaged) : <br />Female</p>
+            <p>Label: Income > 50K</p>
             <button type="submit" name="submit_button" value="Pick dataset" class="stretched-link"></button>
             </form>
             </div>
         </div>
         <div class="col-md-4">
             <div class="card card-3">
-            <h3>Choose your own!</h3>
-            <p>Info about blah</p>
+            <h3 style="text-align: center;">Upload your own dataset!</h3>
+            <p>Be sure to follow the format instructions here</p>
             <p>Info about blah</p>
             </div>
         </div>

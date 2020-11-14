@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/results_shap.css') }}">
+{% endblock %}
+
+{% block content %}
+<style>
+/* h1 {text-align: center;} */
+
+p {text-align: left;}
+
+.centered{
+      display : block;
+      margin : 0 auto;
+      text-align: center;
+      width: 800px;
+      }
+
+</style>
+<div class="container">
+    <h1>SHAP (SHapley Additive exPlanations)</h1>
+    <h2> Detecting Bias </h2>
+
+    <p> 
+        SHAP (SHapley Additive exPlanations) values are used for explaining the output of a model which is in the form of a prediction score between 0 and 1. You can decide a threshold to convert the prediction to a binary class label. For example, you could choose anything below a 0.5 to be label 0 and anything above 0.5 to be label 1. SHAP assigns a score to each feature indicating the degree to which it contributed towards a prediction. The sum of the SHAP scores of each feature of an instance is the prediction score that the model gave to that instance. Therefore, negative SHAP scores contributed to a decrease in the prediction score, while positive SHAP scores contributed to an increase. In this system we follow the convention of label 1 being a positive outcome and label 0 being a negative outcome. If we look at the SHAP scores of the protected attribute of all the instances in this dataset in the following scatter plot, we can figure out if there is bias. The SHAP scores are plotted on the horizontal axis. The vertical axis does not mean anything. The points have just been perturbed vertically so that they do not overlap too much. If there is a clear separation of points, with one group having generally negative SHAP scores and another having generally positive SHAP scores, then the model which generated the prediction scores was taking the protected attribute into account when making predictions. See for yourself if this is the case! You can also play around with the plot by clicking on the groups in the legend in case there is too much overlap.
+    </p>
+
+    <div class="row centered">
+        {{ shap_plt | safe }}
+        {{ shap_src | safe }}
+    </div>
+</div>
+<div class="container"> 
+    <h2>Discrimination Criteria</h2>
+    <p>
+        Now that we have some idea about whether there is or isn't bias in the dataset with respect to the desired protected attribute we can move onto using SHAP scores to show the presence or absence of bias using two well-defined discrimination criteria: demographic parity and equalized odds.
+    </p>
+</div>
+<div class="container">
+    <h3> Demographic Parity </h3>
+    <p>
+        Demographic parity requires the probability of the model assigning a positive outcome (Ŷ=1) for each instance of each protected attribute (A) to be the same. In mathematical terms this is: 
+    </p>
+        
+    <p style="text-align: center;"> <b>(Ŷ=1|A=1) = P(Ŷ=1|A=0)</b> </p>
+    <p>
+        Intuitively this simply means that the probability of an instance from class A=1 being assigned a positive outcome by the model is equal to the probability of an instance from class A=0 being assigned a positive outcome by the model. 
+    </p>
+
+    <p>
+        Let's examine the distribution of SHAP scores for the instances from Group 0 and those from Group 1 in the dataset without factoring in the ground truth labels. If the distribution for a group is positively skewed while the other is negatively skewed, it indicates the positively skewed group was favored by the model because of its protected attribute while the negatively skewed group was disadvantages because of its protected attribute.
+    </p>
+    <div class="row centered">
+        <img src="/static/images/shap/shap_demoparity_normal.png">
+    </div>
+    <div class="centered">
+        {{ demo_plt | safe }}
+        {{ demo_src | safe }}
+    </div>
+
+</div>
+
+<div class="container">
+    <h3> Equalized Odds </h3>
+    <p>
+        Equalized odds requires false positive and true positive rates across the protected classes to be the same. This notion can be mathematically expressed using the following equations where Ŷ is the output of the model, Y is the ground truth label, and A is the protected class:
+    </p>
+
+    <p style="text-align: center;"><b>P(Ŷ=1|A=1, Y=1) = P(Ŷ=1|A=0, Y=1) </b>and <br /> 
+    <b>P(Ŷ=1|A=1, Y=0) = P(Ŷ=1|A=0, Y=0) </b></p>
+
+    <p>
+        Intuitively this means that the probability of a qualified individual (Y=1) from class A=1 should have the same probability of being assigned a positive outcome (Ŷ=1) by the model as a qualified individual (Y=1) from class A=0. The same applies to unqualified individuals (Y=0) from both classes. This ensures that the model treats instances from both classes similarly both when it is correct and when it makes a mistake. 
+    </p>
+    <p>
+        Let's examine the two plots below which show the distribution of SHAP scores of the protected attribute for the different groups. The plot on the left shows the distribution of SHAP scores for when the ground truth label was 1 (the positive outcome), while the plot on the left shows the distirbution of SHAP scores when the ground truth label was 0 (the negative outcome). If you observe that one group has a positively skewed distribution, such as a peak in the positive region, while the other group has a negatively skewed distribution, then this is a violation of equalized odds. In the plot on the left, skewed distributions would mean the model is making it harder for deserving individuals of one group to get the positive outcome while making it easier for deserving individuals in the other group. Similarly, in the plot on the right, skewed distributions would mean the model is making it harder for undeserving individuals of one group to get the positive outcome while making it easier for undeserving individuals in the other group.
+    </p>
+    <div class="row">
+
+        <div class="col-md-6">
+            <img src="/static/images/shap/shap_eq_odds_y1_normal.png">
+        </div>
+        <div class="col-md-6">
+            <img src="/static/images/shap/shap_eq_odds_y0_normal.png">
+        </div>
+    </div>
+    <br />
+    <p>
+        If we randomize the protected attribute feature column, while maintaining the group proportions from the original dataset, if the SHAP score distributions for the two groups now look similar to each other, then they are adhering to equalized odds, but simultaneously confirm that the original distributions were biased.
+    </p>
+    <div class="row">
+
+        <div class="col-md-6">
+            <img src="/static/images/shap/shap_eq_odds_y1_random.png">
+        </div>
+        <div class="col-md-6">
+            <img src="/static/images/shap/shap_eq_odds_y0_random.png">
+        </div>
+    </div>  
+</div>
+
+
+<div class="container">
+    <h1>Mitigating Bias using Derived Predictors</h1>
+
+    <h2>Derived predictors to achieve Equalized Odds</h2>
+    <p>
+        Now that we have detected and shown bias using the discrimination criterion with the help of an XAI technique we can move on to leveraging the explanations to mitigate the bias. There is a post-processing technique involving what are called “derived predictors” to achieve equalized odds. Essentially you take some of the predictions of the original model and flip them. How many predictions you flip (what is called the "mixing rate") are determined using convex optimization. In the traditional algorithm, which predictions you flip are randomly determined. This does achieve equalized odds on the races as a whole but it may be unfair to individual people. In the shap-based method, the race Shap scores are used to select the correct individuals to flip, resulting in a higher degree of individual fairness. The table shows how the SHAP-based method performed versus the randomized algorithm. 
+    </p>
+    <h2>Randomized Equalized Odds</h2>
+    <!--------------------------------------------->
+    <table>
+    {% for key, value in rand_eq_odds_results_group_0.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Dataset/Model</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in rand_eq_odds_results_group_0.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <br />
+
+
+    <table>
+    {% for key, value in rand_eq_odds_results_group_1.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Dataset/Model</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in rand_eq_odds_results_group_1.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <!--------------------------------------------->
+    <h2>Shap-based Equalized Odds</h2>
+    <table>
+        {% for key, value in shap_eq_odds_results_group_0.items() %}
+        {% if loop.index==1 %}
+            <tr>
+                <td>Dataset/Model</td>
+            {% for key1, value1 in value.items() %}
+                <td>  {{key1}}  </td> 
+            {% endfor %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    
+        <!-- Print the data -->
+        {% for key, value in shap_eq_odds_results_group_0.items() %}
+            <tr>
+                <td> {{ key }}</td>
+            {% for key1, value1 in value.items() %}
+                <td> {{value1}} </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </table>
+    
+        <br />
+    
+    
+        <table>
+        {% for key, value in shap_eq_odds_results_group_1.items() %}
+        {% if loop.index==1 %}
+            <tr>
+                <td>Dataset/Model</td>
+            {% for key1, value1 in value.items() %}
+                <td>  {{key1}}  </td> 
+            {% endfor %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    
+        <!-- Print the data -->
+        {% for key, value in shap_eq_odds_results_group_1.items() %}
+            <tr>
+                <td> {{ key }}</td>
+            {% for key1, value1 in value.items() %}
+                <td> {{value1}} </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+        </table>
+
+    <!----------->
+    <h2>Derived Predictors to achieve Calibrated Equalized Odds</h2>
+    <div class="container">
+        <p>
+            There is also another method which achieves calibrated equalized odds using derived predictors. However, instead of flipping predictions it changes them to the mean of all the predictions, called the base rate. The following scatter plot graphs the predictions versus the SHAP scores of the instances that were selected by the randomized calibrated equalized odds post-processing approach (red) and those that were selected by the SHAP-based calibrated equalized odds post-processing approach. The prediction scores of these points were reduced or increased to the base rate (the red horizontal dashed line) which is the average of all the prediction scores. As its name suggest the randomized algorithm picked these instances randomly. However, SHAP selects those instances which were advantaged or disadvantaged the most by leveraging the SHAP scores. For example, points in the first are those that had an above-average prediction score and a positive SHAP score, meaning they were favored the most as a result of their protected attribute. Conversely, the points in the third quadrant had a below-average prediction score and a negative SHAP score, meaning they were disadvantaged the most as a result of their protected attribute. The "mixing rate" (which determines how many of these instances' predictions to change to the base rate) for this post-processing approach is determined using a formula from the "On Fairness and Calibration" paper. Once the points from the first and third quadrants have been selected, any points still left to change are picked from the second and fourth quadrants. 
+        </p>
+        <div class="centered">
+            {{ calib_eq_odds_plt | safe }}
+            {{ calib_eq_odds_src | safe }}
+        </div>
+    </div>
+    
+    <br />
+    <h2>Randomized Calibrated Equalized Odds</h2>
+    <table>
+    {% for key, value in rand_calib_eq_odds_results_group_0.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Dataset/Model</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in rand_calib_eq_odds_results_group_0.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <br />
+
+    <table>
+        {% for key, value in rand_calib_eq_odds_results_group_1.items() %}
+        {% if loop.index==1 %}
+            <tr>
+                <td>Dataset/Model</td>
+            {% for key1, value1 in value.items() %}
+                <td>  {{key1}}  </td> 
+            {% endfor %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+    
+        <!-- Print the data -->
+        {% for key, value in rand_calib_eq_odds_results_group_1.items() %}
+            <tr>
+                <td> {{ key }}</td>
+            {% for key1, value1 in value.items() %}
+                <td> {{value1}} </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+
+<!---------------------------------------------------------------->
+    <br />
+    <h2>Shap-based Calibrated Equalized Odds</h2>
+    <table>
+    {% for key, value in shap_calib_eq_odds_results_group_0.items() %}
+    {% if loop.index==1 %}
+        <tr>
+            <td>Dataset/Model</td>
+        {% for key1, value1 in value.items() %}
+            <td>  {{key1}}  </td> 
+        {% endfor %}
+        </tr>
+    {% endif %}
+    {% endfor %}
+
+    <!-- Print the data -->
+    {% for key, value in shap_calib_eq_odds_results_group_0.items() %}
+        <tr>
+            <td> {{ key }}</td>
+        {% for key1, value1 in value.items() %}
+            <td> {{value1}} </td>
+        {% endfor %}
+        </tr>
+    {% endfor %}
+    </table>
+
+    <br />
+
+    <table>
+        {% for key, value in shap_calib_eq_odds_results_group_1.items() %}
+        {% if loop.index==1 %}
+            <tr>
+                <td>Dataset/Model</td>
+            {% for key1, value1 in value.items() %}
+                <td>  {{key1}}  </td> 
+            {% endfor %}
+            </tr>
+        {% endif %}
+        {% endfor %}
+
+        <!-- Print the data -->
+        {% for key, value in shap_calib_eq_odds_results_group_1.items() %}
+            <tr>
+                <td> {{ key }}</td>
+            {% for key1, value1 in value.items() %}
+                <td> {{value1}} </td>
+            {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+</div>
+
+
+{% endblock %}

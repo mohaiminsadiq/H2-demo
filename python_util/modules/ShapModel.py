@@ -191,7 +191,7 @@ class ShapModel:
         p.renderers.extend([vline, hline])
         p.legend.click_policy="hide"
         #show(p)
-        return components(p)
+        return p #components(p)
 
     @staticmethod
     def plot_shap_summaryplot(dataset):
@@ -210,10 +210,30 @@ class ShapModel:
         perturb_0 = np.random.uniform(low=-0.05, high=0.05, size=(len(shap_0),))
         p.scatter(x=shap_1, y=perturb_1, fill_color='red', legend_label='Underprivileged group')
         p.scatter(x=shap_0,  y=perturb_0, fill_color='blue', legend_label='Privileged group')
+        p.yaxis.visible = False
         p.xaxis.axis_label = "Shap Scores"
         p.legend.click_policy="hide"
         #show(p)
-        return components(p)
+        return p#components(p)
+
+    @staticmethod
+    def get_shap_demoParity(dataset):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
+
+        df = pd.read_csv(data_filepath)
+        G1 =  df[df['group']==1].index
+        G0 =  df[df['group']==0].index
+
+        plt.figure()
+        sns.kdeplot(df.loc[G1, 'shap'], label = 'Group 1 (underprivileged)')
+        sns.kdeplot(df.loc[G0, 'shap'], label = 'Group 0 (privileged)')
+        plt.legend()
+        image_filepath = os.path.join(my_path, "../../static/images/shap/shap_demoparity_normal.png")
+        plt.savefig(image_filepath)
 
     @staticmethod
     def plot_shap_kdeplots(dataset):
@@ -233,18 +253,18 @@ class ShapModel:
 
         #Showing violation of eq odds for Y=1 and both groups
         plt.figure()
-        sns.kdeplot(df.loc[Y_1_G1, 'shap'], label = 'Group 1 (underprivileged) and Y = 1 (positive outcome)', color='blue')
-        sns.kdeplot(df.loc[Y_1_G0, 'shap'], label = 'Group 0 (privileged) and Y = 1 (positive outcome)', color='orange')
+        sns.kdeplot(df.loc[Y_1_G1, 'shap'], label = 'Group 1 (underprivileged) and Y = 1 (positive outcome)')
+        sns.kdeplot(df.loc[Y_1_G0, 'shap'], label = 'Group 0 (privileged) and Y = 1 (positive outcome)')
         plt.legend()
-        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y1_normal.png")
+        image_filepath = os.path.join(my_path, "../../static/images/shap/shap_eq_odds_y1_normal.png")
         plt.savefig(image_filepath)
 
         #Showing violation of eq odds for Y=0 and both groups
         plt.figure()
-        sns.kdeplot(df.loc[Y_0_G1, 'shap'], label = 'Group 1 (underprivileged) and Y = 0 (negative outcome)', color='blue')
-        sns.kdeplot(df.loc[Y_0_G0, 'shap'], label = 'Group 0 (privileged) and Y = 0 (negative outcome)', color='orange')
+        sns.kdeplot(df.loc[Y_0_G1, 'shap'], label = 'Group 1 (underprivileged) and Y = 0 (negative outcome)')
+        sns.kdeplot(df.loc[Y_0_G0, 'shap'], label = 'Group 0 (privileged) and Y = 0 (negative outcome)')
         plt.legend()
-        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y0_normal.png")
+        image_filepath = os.path.join(my_path, "../../static/images/shap/shap_eq_odds_y0_normal.png")
         plt.savefig(image_filepath)
 
         #Introduce randomization fo groups
@@ -257,20 +277,34 @@ class ShapModel:
 
         #Showing adherence to eq odds for Y=1 and both groups
         plt.figure()
-        sns.kdeplot(df.loc[Y_1_G1_rand, 'shap'], label = 'Randomized Group 1 (underprivileged) and Y = 1 (positive outcome)', color='blue')
-        sns.kdeplot(df.loc[Y_1_G0_rand, 'shap'], label = 'Randomized Group 0 (privileged) and Y = 1 (positive outcome)', color='orange')
+        sns.kdeplot(df.loc[Y_1_G1_rand, 'shap'], label = 'Randomized Group 1 (underprivileged) and Y = 1 (positive outcome)')
+        sns.kdeplot(df.loc[Y_1_G0_rand, 'shap'], label = 'Randomized Group 0 (privileged) and Y = 1 (positive outcome)')
         plt.legend()
-        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y1_random.png")
+        image_filepath = os.path.join(my_path, "../../static/images/shap/shap_eq_odds_y1_random.png")
         plt.savefig(image_filepath)
 
         #Showing adherence to eq odds for Y=0 and both groups
         plt.figure()
-        sns.kdeplot(df.loc[Y_0_G1_rand, 'shap'], label = 'Randomized Group 1 (underprivileged) and Y = 0 (negative outcome)', color='blue')
-        sns.kdeplot(df.loc[Y_0_G0_rand, 'shap'], label = 'Randomized Group 0 (privileged) and Y = 0 (negative outcome)', color='orange')        
+        sns.kdeplot(df.loc[Y_0_G1_rand, 'shap'], label = 'Randomized Group 1 (underprivileged) and Y = 0 (negative outcome)')
+        sns.kdeplot(df.loc[Y_0_G0_rand, 'shap'], label = 'Randomized Group 0 (privileged) and Y = 0 (negative outcome)')        
         plt.legend()
-        image_filepath = os.path.join(my_path, "../../static/images/eq_odds_y0_random.png")
+        image_filepath = os.path.join(my_path, "../../static/images/shap/shap_eq_odds_y0_random.png")
         plt.savefig(image_filepath)
         
+    def dicts_compiler(self):
+        eq_odds_results_group_0 = {"Original group 0 model":self.group_0_test_model.results_dict(),
+        "Equalized odds group 0 model": self.eq_odds_group_0_test_model.results_dict()}
+
+        eq_odds_results_group_1 = {"Original group 1 model":self.group_1_test_model.results_dict(),
+        "Equalized odds group 1 model": self.eq_odds_group_1_test_model.results_dict()}
+
+        calib_eq_odds_results_group_0 = {"Original group 0 model":self.group_0_test_model.results_dict(),
+        "Calibrated Equalized odds group 0 model": self.calib_eq_odds_group_0_test_model.results_dict()}
+
+        calib_eq_odds_results_group_1 = {"Original group 1 model":self.group_1_test_model.results_dict(),
+        "Calibrated Equalized odds group 1 model": self.calib_eq_odds_group_1_test_model.results_dict()}
+
+        return eq_odds_results_group_0, eq_odds_results_group_1, calib_eq_odds_results_group_0, calib_eq_odds_results_group_1
 
 class Model(namedtuple('Model', 'id shap pred label')):
   
@@ -357,7 +391,7 @@ class Model(namedtuple('Model', 'id shap pred label')):
             w_fn*fn_rate / norm_const * self.fn_cost() * self.base_rate()
         return res
     
-    def calib_eq_odds(self, other, fp_rate, fn_rate, shap_enabled =  False, mix_rates=None):
+    def calib_eq_odds(self, other, fp_rate, fn_rate, shap_enabled = False, mix_rates=None):
         if mix_rates is None:
           if fn_rate == 0:
               self_cost = self.fp_cost()
@@ -397,12 +431,12 @@ class Model(namedtuple('Model', 'id shap pred label')):
         calib_eq_odds_self = Model(self_changed_id, self.shap, self_new_pred, self.label)
         
         if self_mix_rate >0:
-          print("Changing SELF Model--------------- for self mix rate ", self_mix_rate)
+          #print("Changing SELF Model--------------- for self mix rate ", self_mix_rate)
           df = self.get_pandas_df()          
-          df.plot.scatter(x ='shap', y='pred')
-          plt.axhline(y=self.base_rate(), color='r', linestyle='-')
-          plt.title("Choosing " +str(len(self_changed_id)) + " Individuals from " + str(len(self_changed_id)) + "individuals")
-          plt.show()
+          #df.plot.scatter(x ='shap', y='pred')
+          #plt.axhline(y=self.base_rate(), color='r', linestyle='-')
+          #plt.title("Choosing " +str(len(self_changed_id)) + " Individuals from " + str(len(self_changed_id)) + "individuals")
+          #plt.show()
         else:
           print("Number of people with equal predictions in self " , np.sum(self_new_pred==self.pred))
 
@@ -410,7 +444,7 @@ class Model(namedtuple('Model', 'id shap pred label')):
           other_changed_id, other_new_pred = other.shap_fair_individuals_calibrated(other_mix_rate, advantaged = False)
         else:
           other_changed_id, other_new_pred = other.randomized_fair_individuals_calibrated(other_mix_rate)
-        sns.set(rc={'figure.figsize':(5.7,5.27)})
+        #sns.set(rc={'figure.figsize':(5.7,5.27)})
 
         
           
@@ -419,13 +453,13 @@ class Model(namedtuple('Model', 'id shap pred label')):
         if other_mix_rate >0:
           print("Changing Other Model--------------- for other mix rate ", other_mix_rate)
           df = other.get_pandas_df()
-          sns.set(rc={'figure.figsize':(12.7,8.27)})
-          df.plot.scatter(x ='shap', y='pred')
-          plt.axhline(y=other.base_rate(), color='g', linestyle='--', linewidth = 5)
-          plt.axvline(x=0, color='g', linestyle='--', linewidth = 5)
-          plt.xlim(-0.1, 0.1)
-          plt.title("Need to choose " +str(len(other_changed_id)) + " people from " + str(len(other.shap)) + " individuals")
-          plt.show()
+          #sns.set(rc={'figure.figsize':(12.7,8.27)})
+          #df.plot.scatter(x ='shap', y='pred')
+          #plt.axhline(y=other.base_rate(), color='g', linestyle='--', linewidth = 5)
+          #plt.axvline(x=0, color='g', linestyle='--', linewidth = 5)
+          #plt.xlim(-0.1, 0.1)
+          #plt.title("Need to choose " +str(len(other_changed_id)) + " people from " + str(len(other.shap)) + " individuals")
+          #plt.show()
         else:
           print("Number of people with equal predictions in self " , np.sum(other_new_pred==other.pred))
         
@@ -660,3 +694,4 @@ class Model(namedtuple('Model', 'id shap pred label')):
             'Base rate': round(self.base_rate(),3),
             'Avg. score': round(self.pred.mean(),3)
             }  
+
