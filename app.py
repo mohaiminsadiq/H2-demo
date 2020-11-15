@@ -1,10 +1,15 @@
 from python_util.API import API
 from python_util.modules.ShapModel import ShapModel
 
-from flask import Flask, render_template, request, redirect, url_for, make_response
+from flask import Flask, render_template, request, redirect, url_for, make_response, flash
 from bokeh.embed import components
+from werkzeug.utils import secure_filename
+import csv
+import os
+
 
 app = Flask(__name__)
+app.secret_key = b'_5#y2L"F4Q8z\n\xec]/'
 
 @app.route('/bokeh_self_check', methods=['POST', 'GET'])
 def bokeh_self_check():
@@ -122,6 +127,24 @@ def results():
                                     calib_eq_odds_src=calib_eq_odds_src)
         elif method == 'loco':
             return render_template('results_loco.html')
+
+@app.route('/uploader', methods = ['GET', 'POST'])
+def upload_file():
+    if request.method == 'POST':
+        f = request.files['file']
+        filePath = os.path.join('python_util/data', secure_filename(f.filename))
+        f.save(filePath)
+        try:
+            with open(filePath, "r") as f:
+                rowCount = 0
+                reader = csv.DictReader(f)
+                for row in reader:
+                    rowCount = rowCount + 1
+        except Exception:
+            os.remove(filePath)
+            flash("file not uploaded, not a csv file!")
+
+    return redirect(url_for('dataset'))
 
 @app.after_request
 def add_header(r):
