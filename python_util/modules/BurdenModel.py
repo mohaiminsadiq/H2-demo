@@ -12,6 +12,7 @@ from bokeh.io import show
 from bokeh.models import CustomJS, Slider
 from  bokeh.models.sources import ColumnDataSource
 from bokeh.layouts import column, row
+import tabulate
 
 def pair_wise_avg(iter):
         ret = []
@@ -197,7 +198,52 @@ class BurdenModel:
 
         
         return p
-               
+    
+    def get_burden_table(self, dataset):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+
+        full_data = pd.read_csv(data_filepath)
+        
+        before0, before1, g0, g1 = self.equalized_odds_burden(dataset)
+        _, _, pg0, pg1 = self.equalized_odds_part_burden(dataset)
+
+        table = [["None", 0, before0.accuracy(), 
+          before0.fp_cost(), 
+          before0.fn_cost(), 
+          before0.base_rate(), 
+          before0.pred.mean()],
+         ["None", 1, before1.accuracy(), 
+          before1.fp_cost(), 
+          before1.fn_cost(), 
+          before1.base_rate(), 
+          before1.pred.mean()],
+         ["Burden", 0, g0.accuracy(), 
+          g0.fp_cost(), 
+          g0.fn_cost(), 
+          g0.base_rate(), 
+          g0.pred.mean()],
+         ["Burden", 1, g1.accuracy(), 
+          g1.fp_cost(), 
+          g1.fn_cost(), 
+          g1.base_rate(), 
+          g1.pred.mean()],
+         ["Partial Burden", 0, pg0.accuracy(), 
+          pg0.fp_cost(), 
+          pg0.fn_cost(), 
+          pg0.base_rate(), 
+          pg0.pred.mean()],
+         ["Partial Burden", 1, pg1.accuracy(), 
+          pg1.fp_cost(), 
+          pg1.fn_cost(), 
+          pg1.base_rate(), 
+          pg1.pred.mean()]]
+        head = ['Method', 'Group', 'Accuracy', 'F.P. Cost', 'F.N. cost', 'Base rate', 'Avg. score']
+        return tabulate.tabulate(table, tablefmt='html', headers=head)
+        
     def get_burden_demoParity(self, dataset): 
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
@@ -217,13 +263,13 @@ class BurdenModel:
         x_1 = [width, width*2+padd, width*3+padd*2]
         x_0 = [0, width+padd, width*2+padd*2]
         values_1 = [
-                  full_data[(full_data['group'] == 1) & (full_data['label'] == 1)].prediction.round().mean(),
-                  g1.datadf[g1.datadf['label'] == 1].prediction.round().mean(),
-                  pg1.datadf[pg1.datadf['label'] == 1].prediction.round().mean()
+                  full_data[(full_data['group'] == 1)].prediction.round().mean(),
+                  g1.datadf.prediction.round().mean(),
+                  pg1.datadf.prediction.round().mean()
                   ]
-        values_0 = [full_data[(full_data['group'] == 0) & (full_data['label'] == 1)].prediction.round().mean(),
-                    g0.datadf[g0.datadf['label'] == 1].prediction.round().mean(),
-                    pg0.datadf[pg0.datadf['label'] == 1].prediction.round().mean()
+        values_0 = [full_data[(full_data['group'] == 0)].prediction.round().mean(),
+                    g0.datadf.prediction.round().mean(),
+                    pg0.datadf.prediction.round().mean()
         ]
         labels = ['default', 'burden', 'partial burden']
         p = figure( plot_height=200, 

@@ -13,6 +13,7 @@ from bokeh.io import show
 from bokeh.models import CustomJS, Slider
 from  bokeh.models.sources import ColumnDataSource
 from bokeh.layouts import column, row
+import tabulate
 
 def pair_wise_avg(iter):
         ret = []
@@ -197,7 +198,42 @@ class LocoModel:
 
         
         return p
-               
+    
+    def get_loco_table(self, dataset):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+
+        full_data = pd.read_csv(data_filepath)
+        
+        before0, before1, g0, g1 = self.equalized_odds_loco(dataset)
+
+        table = [["None", 0, before0.accuracy(), 
+          before0.fp_cost(), 
+          before0.fn_cost(), 
+          before0.base_rate(), 
+          before0.pred.mean()],
+         ["None", 1, before1.accuracy(), 
+          before1.fp_cost(), 
+          before1.fn_cost(), 
+          before1.base_rate(), 
+          before1.pred.mean()],
+         ["LOCO", 0, g0.accuracy(), 
+          g0.fp_cost(), 
+          g0.fn_cost(), 
+          g0.base_rate(), 
+          g0.pred.mean()],
+         ["LOCO", 1, g1.accuracy(), 
+          g1.fp_cost(), 
+          g1.fn_cost(), 
+          g1.base_rate(), 
+          g1.pred.mean()]]
+        head = ['Method', 'Group', 'Accuracy', 'F.P. Cost', 'F.N. cost', 'Base rate', 'Avg. score']
+        return tabulate.tabulate(table, tablefmt='html', headers=head)
+
+    
     def get_loco_demoParity(self, dataset): 
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
@@ -216,10 +252,10 @@ class LocoModel:
         x_1 = [width, width*2+padd]
         x_0 = [0, width+padd]
         values_1 = [
-                  full_data[(full_data['group'] == 1) & (full_data['label'] == 1)].prediction.round().mean(),
+                  full_data[(full_data['group'] == 1)].prediction.round().mean(),
                   g1.pred.round().mean(),
                   ]
-        values_0 = [full_data[(full_data['group'] == 0) & (full_data['label'] == 1)].prediction.round().mean(),
+        values_0 = [full_data[(full_data['group'] == 0)].prediction.round().mean(),
                     g0.pred.round().mean(),
         ]
         labels = ['default', 'loco']

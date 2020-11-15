@@ -28,9 +28,9 @@ class API:
             else:    
                 return self.model.equalized_odds_shap(self.dataset, shap_enabled)
         elif self.method == "burden":
-            return self.model.equalized_odds_burden(self.dataset)
+            return self.model.get_burden_table(self.dataset)
         elif self.method == "loco":
-            return self.model.equalized_odds_loco(self.dataset)
+            return self.model.get_loco_table(self.dataset)
         else: 
             return None
             

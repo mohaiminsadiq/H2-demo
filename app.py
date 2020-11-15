@@ -77,7 +77,8 @@ def results():
                                     demo_plt=demo_plt,
                                     demo_src=demo_src,
                                     scat_plt=scatter_plt,
-                                    scat_src=scatter_src)
+                                    scat_src=scatter_src,
+                                    burden_table=graph_handle.get_model_results())
         elif method == 'shap':
             #detection
             shap_plt, shap_src = components(graph_handle.get_repr_graph())
@@ -121,7 +122,17 @@ def results():
                                     calib_eq_odds_plt=calib_eq_odds_plt,
                                     calib_eq_odds_src=calib_eq_odds_src)
         elif method == 'loco':
-            return render_template('results_loco.html')
+            loco_plt, loco_src = components(graph_handle.get_repr_graph())
+            demo_plt, demo_src = components(graph_handle.get_demoParity_graph())
+            scatter_plt, scatter_src = components(graph_handle.get_scatter_plot())
+            return render_template('results_loco.html',
+                                    loco_plt=loco_plt, 
+                                    loco_src=loco_src,
+                                    demo_plt=demo_plt,
+                                    demo_src=demo_src,
+                                    scatter_plt=scatter_plt, 
+                                    scatter_src=scatter_src,
+                                    loco_table=graph_handle.get_model_results())
 
 @app.after_request
 def add_header(r):

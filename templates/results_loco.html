@@ -1,9 +1,8 @@
 {% extends 'base.html' %}
 
 {% block head %}
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/results_burden.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/results_loco.css') }}">
 {% endblock %}
-
 
 {% block content %}
 <style>
@@ -20,17 +19,17 @@ p {text-align: center;}
 
 </style>
 
-<h1> Burden Plot </h1>
+<h1> Loco Plot </h1>
 <div class="centered">
-    {{ burden_plt | safe }}
-    {{ burden_src | safe }}
+    {{ loco_plt | safe }}
+    {{ loco_src | safe }}
 </div>
 <div class="centered">
     {{ scat_plt | safe }}
     {{ scat_src | safe }}
 </div>
 <p> 
-Burden is a blah blah blah blah
+Loco is a blah blah blah blah
 </p>
 
 <h1> Demographic Parity </h1>
@@ -41,9 +40,10 @@ Burden is a blah blah blah blah
 <p>
 Demographic Parity is blah blah blah
 </p>
+
 <h1> Raw Results </h1>
 <div class="centered">
-    {{ burden_table | safe }}
+    {{ loco_table | safe }}
 </div>
 <p>
 Raw Results are blah blah blah

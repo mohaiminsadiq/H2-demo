@@ -232,7 +232,9 @@ class ShapModel:
         sns.kdeplot(df.loc[G1, 'shap'], label = 'Group 1 (underprivileged)')
         sns.kdeplot(df.loc[G0, 'shap'], label = 'Group 0 (privileged)')
         plt.legend()
-        image_filepath = os.path.join(my_path, "../../static/images/shap/shap_demoparity_normal.png")
+        image_filepath = os.path.join(my_path, "..", "..", "static", "images", "shap")
+        os.makedirs(image_filepath, exist_ok=True)
+        image_filepath = os.path.join(image_filepath, "shap_demoparity_normal.png")
         plt.savefig(image_filepath)
 
     @staticmethod
