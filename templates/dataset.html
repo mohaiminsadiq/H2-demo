@@ -41,7 +41,20 @@
 <div class="container">
     <h2 style="text-align: center;">Select a Dataset</h2>
     <br />
-    
+    <div class="container" style="min-height:100% width:80%">
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-warning alert-dismissible" role="alert">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
+                {{message}}
+                </div>
+            {% endfor %}
+            <br />
+            <br />
+            {% endif %}
+        {% endwith %}
+
         <div class="row">
         <div class="col-md-4">
             <div class="card card-1">
@@ -90,21 +103,6 @@
     </div>
     </form>
   </div>
-
-<br>
-<br>
-<br>
-<div class="container" style="min-height:100% width:80%">
-{% with messages = get_flashed_messages() %}
-    {% if messages %}
-    {% for message in messages %}
-        <div class="alert alert-warning alert-dismissible" role="alert">
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">×</span></button>
-        {{message}}
-        </div>
-    {% endfor %}
-    {% endif %}
-{% endwith %}
 
 {% block body %}{% endblock %}
 </div>

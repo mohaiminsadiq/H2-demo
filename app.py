@@ -143,7 +143,7 @@ def results():
 def upload_file():
     if request.method == 'POST':
         f = request.files['file']
-        filePath = os.path.join('python_util/data', secure_filename(f.filename))
+        filePath = os.path.join('python_util/data', 'user.csv')#secure_filename(f.filename))
         f.save(filePath)
         try:
             with open(filePath, "r") as f:
@@ -154,6 +154,10 @@ def upload_file():
         except Exception:
             os.remove(filePath)
             flash("file not uploaded, not a csv file!")
+        else:
+            resp = make_response(redirect(url_for('method')))
+            resp.set_cookie('dataset', 'user')
+            return resp
 
     return redirect(url_for('dataset'))
 
