@@ -21,6 +21,8 @@ class ShapModel:
             data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
 
         test_and_val_data = pd.read_csv(data_filepath)
         np.random.seed(42)
@@ -146,6 +148,8 @@ class ShapModel:
             data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
 
         test_and_val_data = pd.read_csv(data_filepath)
         test_and_val_data.reset_index(drop=True, inplace=True)
@@ -200,6 +204,8 @@ class ShapModel:
             data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")    
 
         df = pd.read_csv(data_filepath)
 
@@ -223,6 +229,8 @@ class ShapModel:
             data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
 
         df = pd.read_csv(data_filepath)
         G1 =  df[df['group']==1].index
@@ -244,6 +252,8 @@ class ShapModel:
             data_filepath = os.path.join(my_path, "../data/compas_shap_postprocess.csv") 
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_shap_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
 
         df = pd.read_csv(data_filepath)
 
