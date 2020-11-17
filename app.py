@@ -1,5 +1,6 @@
 from python_util.API import API
 from python_util.modules.ShapModel import ShapModel
+from python_util.Image_Helpers import generate_genetic_plot
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, flash
 from bokeh.embed import components
@@ -31,6 +32,11 @@ def home():
     else:
         return render_template('home.html')
 
+@app.route('/genetic', methods=['POST', 'GET'])
+def genetic():
+    plt, src = components(generate_genetic_plot())
+    return render_template('genetic_page.html', plt=plt, src=src)
+        
 @app.route('/dataset', methods=['POST', 'GET'])
 def dataset():
     if request.method == 'POST':
@@ -76,9 +82,12 @@ def results():
             burden_plt, burden_src = components(graph_handle.get_repr_graph())
             demo_plt, demo_src = components(graph_handle.get_demoParity_graph())
             scatter_plt, scatter_src = components(graph_handle.get_scatter_plot())
+            pmf_plt, pmf_src = components(graph_handle.get_eq_odds_graphs())
             return render_template('results_burden.html',
                                     burden_plt=burden_plt,
                                     burden_src=burden_src,
+                                    burden_pmf_plt=pmf_plt,
+                                    burden_pmf_src=pmf_src,
                                     demo_plt=demo_plt,
                                     demo_src=demo_src,
                                     scat_plt=scatter_plt,
@@ -129,14 +138,14 @@ def results():
         elif method == 'loco':
             loco_plt, loco_src = components(graph_handle.get_repr_graph())
             demo_plt, demo_src = components(graph_handle.get_demoParity_graph())
-            scatter_plt, scatter_src = components(graph_handle.get_scatter_plot())
+            scatter_plt, scatter_src = components(graph_handle.get_eq_odds_graphs())
             return render_template('results_loco.html',
                                     loco_plt=loco_plt, 
                                     loco_src=loco_src,
                                     demo_plt=demo_plt,
                                     demo_src=demo_src,
-                                    scatter_plt=scatter_plt, 
-                                    scatter_src=scatter_src,
+                                    scat_plt=scatter_plt, 
+                                    scat_src=scatter_src,
                                     loco_table=graph_handle.get_model_results())
 
 @app.route('/uploader', methods = ['GET', 'POST'])

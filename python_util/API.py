@@ -54,12 +54,12 @@ class API:
             
     def get_eq_odds_graphs(self):
         if self.method == "burden":
-            pass
+            return self.model.plot_burden_kdeplots(self.dataset)
         elif self.method == "shap":
             #nothing to return, will save the plots as images, html will pull from correct folder
             self.model.plot_shap_kdeplots(self.dataset)
         elif self.method == "loco":
-            pass
+            return self.model.plot_loco_kdeplots(self.dataset)
         return None
 
     def get_calib_eq_odds_graph(self, t_ceo_g0, t_ceo_g1, f_ceo_g0, f_ceo_g1):
