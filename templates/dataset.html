@@ -41,7 +41,7 @@
 <div class="container">
     <h2 style="text-align: center;">Select a Dataset</h2>
     <br />
-    <div class="container" style="min-height:100% width:80%">
+    <div class="container" style="min-height:100%">
         {% with messages = get_flashed_messages() %}
             {% if messages %}
             {% for message in messages %}
@@ -85,9 +85,8 @@
         <div class="col-md-4">
             <div class="card card-3">
             <h3 style="text-align: center;">Upload your own dataset!</h3>
-            <p>Be sure to follow the format instructions here</p>
-            <p>Info about blah</p>
-            <form action = "http://localhost:5000/uploader" method = "POST" 
+            <p>Be sure to follow the format instructions <a href="/dataformat">here</a></p>
+            <form action = "/uploader" method = "POST" 
                     enctype = "multipart/form-data">
                     <input type = "file" name = "file" />
                     <br>

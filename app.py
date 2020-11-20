@@ -161,6 +161,10 @@ def upload_file():
 
     return redirect(url_for('dataset'))
 
+@app.route('/dataformat', methods = ['GET'])
+def dataformat():
+    return render_template('dataformat_info.html')
+
 @app.after_request
 def add_header(r):
     """

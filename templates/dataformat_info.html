@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+{% block head %}
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/dataset.css') }}"> -->
+<link rel="stylesheet" href="base.css">
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>User Dataset Format Instructions</h2>
+    <p>
+        The uploaded dataset must be in a particular format for the system to detect and mitigate bias properly. Different information must be present in the dataset depending on the method the user intends on using to detect and mitigate bias.
+    </p>
+
+    <h3>SHAP</h3>
+    <p>
+        For using SHAP, a snippet of the dataset format is shown below:
+
+        <div class="row centered" style="justify-content: center; align-items: center;">
+            <figure class="figure">
+                <img src="/static/images/dataset_formats/shap_format.PNG">
+                <figcaption class="figure-caption text-center">Input Dataset Format for SHAP</figcaption>
+            </figure>
+        </div>
+        <br>
+        <ul>
+            <li>
+                The 'id' column is simply the ordered index of the instances.
+            </li>
+            <li>
+                The 'shap' column is for the shap score of the relevant protected attribute of the instance.
+            </li>
+            <li>    
+                The 'label' column is the binary ground truth label. For this system we follow the convention of 1 being the positive outcome, e.g. high income or low recividism score, and 0 being the negative outcome, e.g. low income or high recividism score.
+            
+            </li>
+    
+            <li>
+                The 'group' column is the binary label for the protected attribute. For this system we follow the convention of 1 being the disadvantaged group and 0 being the advantaged group. For example, for COMPAS, African Americans are labeled 1, while Caucasians are labeled 0.
+            </li>
+
+            <li>
+                The 'prediction' column is the probability of belonging to label 1, output by the biased model.
+            </li>
+        </ul>
+    </p>
+
+    <h3>Burden</h3>
+
+    <p>
+        For using burden, a snippet of the dataset format is shown below.
+
+        <div class="row centered" style="justify-content: center; align-items: center;">
+            <figure class="figure">
+                <img src="/static/images/dataset_formats/burden_format.PNG">
+                <figcaption class="figure-caption text-center">Input Dataset Format for Burden</figcaption>
+            </figure>
+        </div>
+        <br>
+
+        This is very similar to SHAP except that the 'shap' column is replaced with a column of fitness scores.
+    </p>
+
+    <h3>LOCO</h3>
+    <p>
+        For using LOCO, a snippet of the dataset format is shown below.
+
+        <div class="row centered" style="justify-content: center; align-items: center;">
+            <figure class="figure">
+                <img src="/static/images/dataset_formats/loco_format.PNG">
+                <figcaption class="figure-caption text-center">Input Dataset Format for LOCO</figcaption>
+            </figure>
+        </div>
+        <br>
+
+        This is very similar to LOCO except that the 'shap' column is replaced with a column of loco scores.
+    </p>
+
+</div>
+{% endblock %}
