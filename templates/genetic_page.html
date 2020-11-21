@@ -22,19 +22,20 @@ p {text-align: left;}
 <div class="container"> 
 
 <div class="centered">
-<h1> Gentic Algorithm </h1>    
+<h1> Genetic Algorithm </h1>    
 <div class="centered">
 <p> 
-    In order to find bias in a ML model via burden on a specific class, we need to find “counterfactual” corresponding to each data point in the dataset.
+    In order to find bias in a ML model via burden on a specific class of population, we need to find “counterfactual” corresponding to each data point in the dataset.
 </p><p>
     Counterfactual is the point that is closest to the original point, but results in the opposite classification by the ML model.
 </p><p>
-    Thus we can see the counterfactual as a measure, of how far is one individual from getting the opposite decision in a ML model, 
-    and burden is the average of this measure within some group of individuals (e.g. with a specific skin color, or a specific race).
+    Thus we can see the counterfactual as a measure, of how far one individual is from getting the opposite decision in the ML model, 
+    and burden is the average of this distance between each individual and counterfactual, within some subset of the entire population
+     (e.g. with a specific skin color, or a specific race). This is why the word "burden" is used, as it shows the burden on people with a specific attribute.
 </p><p>
-    We find counterfactuals using a genetic algorithm, which is demonstrated below. The genetic algorithm involves randomly generating points within sample
-    space, randomly mutating some population, randomly crossoverring some features between some population, and filtering the candidates with better fitness
-    (i.e. closer distance from the original individual) to find the optimal counterfactual.
+    We find counterfactuals using a genetic algorithm, which is demonstrated below. The genetic algorithm involves randomly generating points within the sample
+    space, then randomly mutating some population, randomly crossoverring some features between some population, and filtering the candidates with better fitness
+    (i.e. closer distance from the original individual). These steps are repeated over generations, to find the optimal counterfactual.
 </p>
 <h2> Genetic Algorithm in Artificial Dataset </h2>
 <div class="centered">
@@ -45,8 +46,8 @@ p {text-align: left;}
     The fitness value is the inverse of distance, thus it means how close two points are. The best fitness is the closeness of individual and 
     current best counterfactual at that generation.
 </p><p>
-    It can be seen that the counterfactual gradually moves toward the closest possible point across the class boundary from the individual.
-</p><p>
+    It can be seen that the counterfactual gradually moves toward the closest possible point across the class boundary from the individual,
+    as generation goes forward.
     In this case, the maximum fitness reaches 17.53 at generation 55.
 </p>
 </div>
@@ -61,11 +62,11 @@ p {text-align: left;}
     counterfactual. The red points are the ones that result in same classification, so cannot be the counterfactual. The blue points are the 
     candidates with top 50% fitness (i.e. closeness), and the green points are bottom 50% candidates for the counterfactual.
 </p><p>
-    Since the ML model is much more complicated than the above case, the class bound boundary is harder to see compared to the above figure, but 
+    Since the ML model is much more complicated than the above case, the class boundary is harder to see compared to the above figure, but 
     the red points (i.e. Non-counterfactuals) are somewhat separeted from candidates for the counterfactual that the algorithm is finding.
 </p><p>
-    It can be seen that the counterfactual gradually moves toward the individual, along with the generations. In this case, the maximum fitness reaches
-    0.46 at generation 10. 
+    It can be seen that the counterfactual gradually moves toward the original individual, as generations goes forward. 
+    In this case, the maximum fitness reaches 0.46 at generation 10. 
 </p>
 </div>
 
