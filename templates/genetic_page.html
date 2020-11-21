@@ -32,7 +32,9 @@ p {text-align: left;}
     Thus we can see the counterfactual as a measure, of how far is one individual from getting the opposite decision in a ML model, 
     and burden is the average of this measure within some group of individuals (e.g. with a specific skin color, or a specific race).
 </p><p>
-    We find counterfactuals using a genetic algorithm, which is demonstrated below.    
+    We find counterfactuals using a genetic algorithm, which is demonstrated below. The genetic algorithm involves randomly generating points within sample
+    space, randomly mutating some population, randomly crossoverring some features between some population, and filtering the candidates with better fitness
+    (i.e. closer distance from the original individual) to find the optimal counterfactual.
 </p>
 <h2> Genetic Algorithm in Artificial Dataset </h2>
 <div class="centered">
@@ -40,10 +42,12 @@ p {text-align: left;}
     {{ src | safe }}
 <p> 
     The above figure shows the evolution of the genetic algorithm, in finding the counterfactual (purple) for the individual (black square).
+    The fitness value is the inverse of distance, thus it means how close two points are. The best fitness is the closenss of individual and 
+    current best counterfactual at that generation.
 </p><p>
     It can be seen that the counterfactual gradually moves toward the closest possible point across the class boundary from the individual.
 </p><p>
-    In this case, the maximum fitness reaches 17.53 at generation 55. The fitness is the inverse of distance, so it means how close two points are.
+    In this case, the maximum fitness reaches 17.53 at generation 55.
 </p>
 </div>
 
@@ -54,11 +58,14 @@ p {text-align: left;}
 <p> 
     The above plot figure shows the evolution of the genetic algorithm in finding the counterfactual in the COMPAS dataset. Among many features, 
     it is showing only 3 features to project in 3D space. The black point is the original individual, and the light blue point is the closest 
-    counterfactual.
+    counterfactual. The red points are the ones that result in same classification, so cannot be the counterfactual. The blue points are the 
+    candidates with top 50% fitness (i.e. closeness), and the Green points are bottom 50% candidates for the counterfactual.
 </p><p>
-    Since the ML model is much more complicated than the above case, the class boundary is not linear and hard to see.
+    Since the ML model is much more complicated than the above case, the class bound boundary is harder to see compared to the above figure, but 
+    the red points (i.e. Non-counterfactuals) are somewhat separeted from candidates for the counterfactual that the algorithm is finding.
 </p><p>
-    However, it can be seen that the counterfactual gradually moves toward the individual, along with the generations.
+    It can be seen that the counterfactual gradually moves toward the individual, along with the generations. In this case, the fitness reaches
+    0.46 at generation 10. 
 </p>
 </div>
 
