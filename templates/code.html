@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block head %}
+<!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/dataset.css') }}"> -->
+{% endblock %}
+
+
+{% block content %}
+<div class="jumbotron text-center">
+  <h1>Team H2</h1>
+  <p>Design of Unbiased Machine Learning Systems Demo</p> 
+</div>
+<div class="container">
+    <form action="/code" method="POST">
+        <div class="gistcontainer" id="shapgist">
+            <a href="#shapgist" class="show">Expand Shap Code</a>
+            <script src="http://gist-it.appspot.com/https://github.com/NathanielCJ/H2-unbiasedml/blob/master/Shap/Shap_API.ipynb"></script>
+        </div>
+        <div class="gistcontainer" id="burdengist">
+            <a href="#burdengist" class="show">Expand Burden Code</a>
+            <script src="http://gist-it.appspot.com/https://github.com/NathanielCJ/H2-unbiasedml/blob/master/Burden/Burden%20Exper_expanded.ipynb"></script>
+        </div>
+		<div class="gistcontainer" id="locogist">
+            <a href="#locogist" class="show">Expand LOCO Code</a>
+            <script src="http://gist-it.appspot.com/https://github.com/NathanielCJ/H2-unbiasedml/blob/master/Loco_Compas.ipynb"></script>
+        </div>
+    </form>
+</div>
+
+{% endblock %}

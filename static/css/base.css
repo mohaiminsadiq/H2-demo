@@ -2,3 +2,11 @@ body, html {
     /* height: 100%; */
     padding-top: 28px;
   }
+  
+  
+ .gistcontainer {
+ 	max-height: 300px;
+ 	overflow:auto;
+ 	}
+ .gistcontainer:target .show {display:none;}
+ .gistcontainer:target {max-height:none;}

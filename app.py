@@ -130,6 +130,12 @@ def testing():
 calib_eq_odds_results_group_0=calib_eq_odds_results_group_0, calib_eq_odds_results_group_1=calib_eq_odds_results_group_1,
 bokeh_plot_eq_odds=div_eq_odds, bokeh_src_eq_odds=src_eq_odds, bokeh_plot_shap=div_shap_plot, bokeh_src_shap=src_shap_plot)
 
+
+@app.route('/code', methods=['POST', 'GET'])
+def code():
+	return render_template('code.html')
+
+
 @app.after_request
 def add_header(r):
     """
