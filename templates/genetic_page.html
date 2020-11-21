@@ -42,7 +42,7 @@ p {text-align: left;}
     {{ src | safe }}
 <p> 
     The above figure shows the evolution of the genetic algorithm, in finding the counterfactual (purple) for the individual (black square).
-    The fitness value is the inverse of distance, thus it means how close two points are. The best fitness is the closenss of individual and 
+    The fitness value is the inverse of distance, thus it means how close two points are. The best fitness is the closeness of individual and 
     current best counterfactual at that generation.
 </p><p>
     It can be seen that the counterfactual gradually moves toward the closest possible point across the class boundary from the individual.
@@ -59,12 +59,12 @@ p {text-align: left;}
     The above plot figure shows the evolution of the genetic algorithm in finding the counterfactual in the COMPAS dataset. Among many features, 
     it is showing only 3 features to project in 3D space. The black point is the original individual, and the light blue point is the closest 
     counterfactual. The red points are the ones that result in same classification, so cannot be the counterfactual. The blue points are the 
-    candidates with top 50% fitness (i.e. closeness), and the Green points are bottom 50% candidates for the counterfactual.
+    candidates with top 50% fitness (i.e. closeness), and the green points are bottom 50% candidates for the counterfactual.
 </p><p>
     Since the ML model is much more complicated than the above case, the class bound boundary is harder to see compared to the above figure, but 
     the red points (i.e. Non-counterfactuals) are somewhat separeted from candidates for the counterfactual that the algorithm is finding.
 </p><p>
-    It can be seen that the counterfactual gradually moves toward the individual, along with the generations. In this case, the fitness reaches
+    It can be seen that the counterfactual gradually moves toward the individual, along with the generations. In this case, the maximum fitness reaches
     0.46 at generation 10. 
 </p>
 </div>
