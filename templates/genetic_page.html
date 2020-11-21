@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/results_burden.css') }}">
+{% endblock %}
+
+{% block content %}
+<style>
+h1 {text-align: left;}
+h2 {text-align: left;}
+p {text-align: left;}
+
+.centered{
+      display : block;
+      margin : 0 auto;
+      text-align: center;
+      width: 800px;
+      }
+
+</style>
+
+<div class="container"> 
+
+<h1> Gentic Algo Artificial </h1>
+<div class="centered">
+    {{ plt | safe }}
+    {{ src | safe }}
+</div>
+</div>
+{% endblock %}

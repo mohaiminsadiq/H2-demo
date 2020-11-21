@@ -7,7 +7,7 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.models import LinearInterpolator, Span, TickFormatter
 from bokeh.io import output_notebook
 from bokeh.embed import components
-from bokeh.models import Range1d
+from bokeh.models import Range1d, HoverTool
 from bokeh.io import show
 from bokeh.models import CustomJS, Slider
 from  bokeh.models.sources import ColumnDataSource
@@ -29,7 +29,9 @@ class BurdenModel:
             data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         test_and_val_data = pd.read_csv(data_filepath)
         test_and_val_data.index = test_and_val_data.id
         np.random.seed(42)
@@ -85,7 +87,9 @@ class BurdenModel:
             data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
         
         g0_burden = 1/full_data[full_data['group'] == 0].fitness
@@ -120,7 +124,7 @@ class BurdenModel:
           )#Signing the axis
         
         hline = Span(location=0, dimension='width', line_color='black', line_width=1)
-        p.yaxis.axis_label='Delta Burden'
+        p.yaxis.axis_label='Burdened Group'
         
         p.sizing_mode = 'scale_width'
         p.legend.click_policy = "hide"
@@ -132,10 +136,11 @@ class BurdenModel:
         p.yaxis.axis_label_text_font_style='bold'
         p.xaxis.axis_label_text_font_style='normal'
         
+        p.xaxis.axis_label = "Distance (Lower is Better)"
+        
         slider = Slider(start=0, end=2, value=2, step=.01, title="offset")
         callback = CustomJS(args=dict(source=source, offset=slider),
                     code="""
-                            console.log("piss")
                             const data = source.data;
                             const y = data['y'];
                             const B = offset.value;
@@ -148,6 +153,56 @@ class BurdenModel:
         
         return row(column(slider, width=100), p)
     
+    def plot_burden_kdeplots(self, dataset):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv") 
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+
+        df = pd.read_csv(data_filepath)
+        
+        hover = HoverTool(
+            tooltips=[
+                ("group", "@group"),
+                ("(dist, prob)", "(@x, @y)")
+            ]
+        )
+        
+        p = figure( plot_height=200, 
+                    plot_width=400,
+                    title="PMF of fitness between two groups",
+                    tools=[hover])
+        
+        smooth_fact = 50
+        
+        loco_1 = 1/df[df['group']==1].fitness
+        ind1, loco_1_pmf = np.histogram(loco_1, bins=int(len(loco_1)/smooth_fact), density=True)
+        loco_0 = 1/df[df['group']==0].fitness
+        ind0, loco_0_pmf = np.histogram(loco_0, bins=int(len(loco_0)/smooth_fact), density=True)
+                        
+        source1 = ColumnDataSource({'x' : loco_1_pmf[:-1], 'y' : ind1, 'group': [1]*len(ind1)})
+        source0 = ColumnDataSource({'x' : loco_0_pmf[:-1], 'y' : ind0, 'group': [0]*len(ind0)})
+        
+        p.line(x='x', y='y', line_color='red', legend_label='group 1', source=source1)
+        p.line(x='x', y='y', line_color='blue', legend_label='group 0', source=source0)
+    
+        p.xaxis.axis_label = "Distance (Lower is Better)"
+        p.yaxis.axis_label = 'Portion of Individuals With Specific Distance'
+        p.sizing_mode = 'scale_width'
+        
+        p.yaxis.axis_label_text_font_size='12pt'
+        p.yaxis.major_label_text_font_size='16pt'
+        p.xaxis.axis_label_text_font_size='16pt'
+        
+        p.yaxis.axis_label_text_font_style='bold'
+        p.xaxis.axis_label_text_font_style='normal'
+        
+        p.legend.click_policy="hide"
+        return p#components(p)
+    
     def get_burden_graph(self, dataset): 
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
@@ -155,7 +210,9 @@ class BurdenModel:
             data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
 
         years = [0]
@@ -205,7 +262,9 @@ class BurdenModel:
             data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
         
         before0, before1, g0, g1 = self.equalized_odds_burden(dataset)
@@ -251,7 +310,9 @@ class BurdenModel:
             data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
         
         _, _, g0, g1 = self.equalized_odds_burden(dataset)
@@ -271,29 +332,41 @@ class BurdenModel:
                     g0.datadf.prediction.round().mean(),
                     pg0.datadf.prediction.round().mean()
         ]
-        labels = ['default', 'burden', 'partial burden']
+        
+        source0 = ColumnDataSource({'x' : x_0, 'y' : values_0})
+        source1 = ColumnDataSource({'x' : x_1, 'y' : values_1})
+        
+        hover = HoverTool(
+            tooltips=[
+                ("Probability", "@y")
+            ]
+        )
+        labels = ['None', 'Burden', 'Partial Burden']
         p = figure( plot_height=200, 
                     plot_width=400,
-                    title="Demographic Parity")#Plotting
-        p.vbar(x_0,                            #categories
-              top = values_0,                      #bar heights
+                    title="Demographic Parity",
+                    tools=[hover])#Plotting
+        p.vbar(x='x',                            #categories
+              top = 'y',                      #bar heights
                width = width,
                fill_alpha = .5,
                fill_color = 'blue',
                line_alpha = .5,
                line_color='green',
                line_dash='solid',   
-               legend_label="group 0"
+               legend_label="group 0",
+               source=source0
           )#Signing the axis
-        p.vbar(x_1,                            #categories
-            top = values_1,                      #bar heights
+        p.vbar(x='x',                            #categories
+            top = 'y',                      #bar heights
             width = width,
             fill_alpha = .5,
             fill_color = 'red',
             line_alpha = .5,
             line_color='green',
             line_dash='solid',   
-            legend_label="group 1"
+            legend_label="group 1",
+            source=source1
         )#Signing the axis
         
         

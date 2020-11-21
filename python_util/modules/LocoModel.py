@@ -8,7 +8,7 @@ from bokeh.plotting import figure, output_file, show
 from bokeh.models import LinearInterpolator, Span, TickFormatter
 from bokeh.io import output_notebook
 from bokeh.embed import components
-from bokeh.models import Range1d
+from bokeh.models import Range1d, HoverTool
 from bokeh.io import show
 from bokeh.models import CustomJS, Slider
 from  bokeh.models.sources import ColumnDataSource
@@ -30,7 +30,9 @@ class LocoModel:
             data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         test_and_val_data = pd.read_csv(data_filepath)
         test_and_val_data.index = test_and_val_data.id
         np.random.seed(42)
@@ -86,7 +88,9 @@ class LocoModel:
             data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
         
         g0_loco = full_data[full_data['group'] == 0].loco
@@ -149,6 +153,36 @@ class LocoModel:
         
         return row(column(slider, width=100), p)
     
+    def plot_loco_kdeplots(self, dataset):
+        my_path = os.path.abspath(os.path.dirname(__file__))
+        if dataset == 'compas':
+            data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv") 
+        elif dataset == 'adult':
+            data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
+        df = pd.read_csv(data_filepath)
+        
+        p = figure()
+        norm = 0
+        loco_1 = df[df['group']==1].loco
+        ind1, loco_1_pmf = pd.np.histogram(loco_1, bins=30)
+        loco_0 = df[df['group']==0].loco
+        ind0, loco_0_pmf = pd.np.histogram(loco_0, bins=30)
+        
+        ind0 = ind0/np.max(ind0)
+        ind1 = ind1/np.max(ind1)
+        
+        print(loco_1_pmf)
+        print(loco_0_pmf)
+        
+        p.line(x=loco_1_pmf, y=ind1, line_color='red', legend_label='Group 1')
+        p.line(x=loco_0_pmf, y=ind0, line_color='blue', legend_label='Group 0')
+        p.xaxis.axis_label = "LOCO Scores"
+        p.legend.click_policy="hide"
+        return p#components(p)
+    
     def get_loco_graph(self, dataset): 
         # Load the validation set scores from csvs
         my_path = os.path.abspath(os.path.dirname(__file__))
@@ -156,56 +190,33 @@ class LocoModel:
             data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
+        df = pd.read_csv(data_filepath)
 
-        full_data = pd.read_csv(data_filepath)
-        
-        years = [0, 1]
-        values = [(full_data[full_data['group'] == 0].loco).mean(),
-                  (full_data[full_data['group'] == 1].loco).mean()]
-        
-        p = figure( plot_height=200, 
-                    plot_width=400,
-                    title="loco between two groups")#Plotting
-        p.vbar(years,                            #categories
-               top = values,                      #bar heights
-               width = .9,
-               fill_alpha = .5,
-               fill_color = ['blue', 'red'],
-               line_alpha = .5,
-               line_color='green',
-               line_dash='solid',              
-          )#Signing the axis
-        
-        hline = Span(location=0, dimension='width', line_color='black', line_width=1)
-        p.renderers.extend([hline])
-        p.yaxis.axis_label='loco score'
-        
-        labels = ['Group 1', 'Group 0']
-        y_tick_locs = (-abs(values[0]), abs(values[0]))
-        p.yaxis.ticker = y_tick_locs
-        label_dict = {}
-        for x, lab in zip(y_tick_locs, labels):
-            label_dict[x] = lab
-        p.yaxis.major_label_overrides = label_dict
-        p.sizing_mode = 'scale_width'
-        
-        p.yaxis.axis_label_text_font_size='16pt'
-        p.yaxis.major_label_text_font_size='16pt'
-        p.xaxis.axis_label_text_font_size='16pt'
-        
-        p.yaxis.axis_label_text_font_style='bold'
-        p.xaxis.axis_label_text_font_style='normal'
-
-        
-        return p
+        p = figure()
+        shap_1 = df[df['group']==1].loco
+        shap_0 = df[df['group']==0].loco
+        perturb_1 = np.random.uniform(low=-0.05, high=0.05, size=(len(shap_1),))
+        perturb_0 = np.random.uniform(low=-0.05, high=0.05, size=(len(shap_0),))
+        p.scatter(x=shap_1, y=perturb_1, fill_color='red', legend_label='Underprivileged group')
+        p.scatter(x=shap_0,  y=perturb_0, fill_color='blue', legend_label='Privileged group')
+        p.yaxis.visible = False
+        p.xaxis.axis_label = "Shap Scores"
+        p.legend.click_policy="hide"
+        #show(p)
+        return p#components(p)
     
     def get_loco_table(self, dataset):
         my_path = os.path.abspath(os.path.dirname(__file__))
         if dataset == 'compas':
-            data_filepath = os.path.join(my_path, "../data/compas_burden_postprocess.csv")
+            data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
-            data_filepath = os.path.join(my_path, "../data/adult_burden_postprocess.csv")
-
+            data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
         
         before0, before1, g0, g1 = self.equalized_odds_loco(dataset)
@@ -241,7 +252,9 @@ class LocoModel:
             data_filepath = os.path.join(my_path, "../data/compas_loco_postprocess.csv")
         elif dataset == 'adult':
             data_filepath = os.path.join(my_path, "../data/adult_loco_postprocess.csv")
-
+        elif dataset == 'user':
+            data_filepath = os.path.join(my_path, "../data/user.csv")
+            
         full_data = pd.read_csv(data_filepath)
         
         _, _, g0, g1 = self.equalized_odds_loco(dataset)

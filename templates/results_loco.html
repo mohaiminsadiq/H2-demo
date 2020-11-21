@@ -6,9 +6,9 @@
 
 {% block content %}
 <style>
-h1 {text-align: center;}
-
-p {text-align: center;}
+h1 {text-align: left;}
+h2 {text-align: left;}
+p {text-align: left;}
 
 .centered{
       display : block;
@@ -19,7 +19,18 @@ p {text-align: center;}
 
 </style>
 
-<h1> Loco Plot </h1>
+<div class="container"> 
+<h1> Leave-One-Covariate-Out (LOCO) </h1>
+<h2> Detecting Bias </h2>
+
+<p> 
+    LOCO is a measure of feature importance. It is the difference between predictions with a feature and without a feature. An important thing to note is that LOCO is a measure of individual fairness which we aggregate into a measure of group fairness. To detect bias using LOCO we look at how different the averages are between the groups. If the average LOCO is towards the negative prediction for one group than the other then that is a clear indication that the model is biased against that group. 
+    
+    Looking at the plots below we first see a scatter plot of the LOCO scores. This is followed by a PMF of the LOCO scores.
+    
+    The plots are interactive so take some time to move around and decide for yourself if there is any bias between the two groups.
+</p>
+
 <div class="centered">
     {{ loco_plt | safe }}
     {{ loco_src | safe }}
@@ -28,25 +39,43 @@ p {text-align: center;}
     {{ scat_plt | safe }}
     {{ scat_src | safe }}
 </div>
-<p> 
-Loco is a blah blah blah blah
+
+<h2>Discrimination Criteria</h2>
+<p>
+    Now that we have some idea about whether there is or isn't bias in the dataset with respect to the desired protected attribute we can move onto using burden to show the presence or absence of bias using two well-defined discrimination criteria: demographic parity and equalized odds.
 </p>
 
 <h1> Demographic Parity </h1>
+<p>
+    Demographic parity requires the probability of the model assigning a positive outcome (Ŷ=1) for each instance of each protected attribute (A) to be the same. In mathematical terms this is: 
+</p>
+    
+<p style="text-align: center;"> <b>(Ŷ=1|A=1) = P(Ŷ=1|A=0)</b> </p>
+<p>
+    Intuitively this simply means that the probability of an instance from class A=1 being assigned a positive outcome by the model is equal to the probability of an instance from class A=0 being assigned a positive outcome by the model. 
+</p>
+
+<p>
+    So one way to measure bias is the difference between these two probabilities. Looking below we can see how these probabilities compare after different bias mitigation techniques have been applied to derived predictors.
+</p>
 <div class="centered">
     {{ demo_plt | safe }}
     {{ demo_src | safe }}
 </div>
-<p>
-Demographic Parity is blah blah blah
-</p>
+
 
 <h1> Raw Results </h1>
+<h2> Derived Predictors </h2>
+<p>
+    Now that we have detected and shown bias using the discrimination criterion with the help of an XAI technique we can move on to leveraging the explanations to mitigate the bias. There is a post-processing technique involving what are called “derived predictors” to achieve equalized odds. Essentially you take some of the predictions of the original model and flip them. How many predictions you flip (what is called the "mixing rate") are determined using convex optimization. In the traditional algorithm, which predictions you flip are randomly determined. This does achieve equalized odds on the races as a whole but it may be unfair to individual people. In the LOCO-based method, the LOCO scores are used to select the correct individuals to flip, resulting in a higher degree of individual fairness. The table shows how the LOCO-based method performed versus the randomized algorithm.  
+</p>
+
 <div class="centered">
     {{ loco_table | safe }}
 </div>
 <p>
 Raw Results are blah blah blah
 </p>
+</div>
 
 {% endblock %}
