@@ -9,6 +9,8 @@ from bokeh.layouts import column, row
 from bokeh.models.glyphs import Quadratic
 from bokeh.models import Div
 import pandas as pd
+from python_util.surface3d import Surface3d
+
 
 def generate_genetic_plot():
     my_path = os.path.abspath(os.path.dirname(__file__))
@@ -108,24 +110,24 @@ def generate_genetic_plot_3D():
     for i in range(25):
         temp = data[(data['generation'] == i+1) & 
                     (data['type'] == 'cfacts')].sort_values('fitness', axis=0, ascending=False)
-        dict_data[str(i)+"x_best"] = [temp['juv_fel_count'].iloc[0]] * 100
-        dict_data[str(i)+"y_best"] = [temp['priors_count'].iloc[0]] * 100
-        dict_data[str(i)+"z_best"] = [temp['race_African_American'].iloc[0]] * 100
+        dict_data[str(i)+"x_best"] = [temp['juv_fel_count'].iloc[0]] * 10
+        dict_data[str(i)+"y_best"] = [temp['priors_count'].iloc[0]] * 10
+        dict_data[str(i)+"z_best"] = [temp['race_African_American'].iloc[0]] * 10
         
-        dict_data[str(i)+"x_good"] = temp['juv_fel_count'].iloc[1:int(len(temp)/2)]
-        dict_data[str(i)+"y_good"] = temp['priors_count'].iloc[1:int(len(temp)/2)]
-        dict_data[str(i)+"z_good"] = temp['race_African_American'].iloc[1:int(len(temp)/2)]
+        dict_data[str(i)+"x_good"] = temp['juv_fel_count'].iloc[1:11]
+        dict_data[str(i)+"y_good"] = temp['priors_count'].iloc[1:11]
+        dict_data[str(i)+"z_good"] = temp['race_African_American'].iloc[1:11]
         
-        dict_data[str(i)+"x_okay"] = temp['juv_fel_count'].iloc[int(len(temp)/2):]
-        dict_data[str(i)+"y_okay"] = temp['priors_count'].iloc[int(len(temp)/2):]     
-        dict_data[str(i)+"z_okay"] = temp['race_African_American'].iloc[int(len(temp)/2):]
+        dict_data[str(i)+"x_okay"] = temp['juv_fel_count'].iloc[11:21]
+        dict_data[str(i)+"y_okay"] = temp['priors_count'].iloc[11:21]     
+        dict_data[str(i)+"z_okay"] = temp['race_African_American'].iloc[11:21]
         
         dict_data[str(i)+"x_bad"] = data[(data['generation'] == i+1) & 
-                                (data['type'] == 'bads')]['juv_fel_count']
+                                (data['type'] == 'bads')]['juv_fel_count'].iloc[:10]
         dict_data[str(i)+"y_bad"] = data[(data['generation'] == i+1) & 
-                                (data['type'] == 'bads')]['priors_count']
+                                (data['type'] == 'bads')]['priors_count'].iloc[:10]
         dict_data[str(i)+"z_bad"] = data[(data['generation'] == i+1) & 
-                                (data['type'] == 'bads')]['race_African_American']
+                                (data['type'] == 'bads')]['race_African_American'].iloc[:10]
                                 
         avg_fit_dict[str(i)] = [data[(data['generation'] == i+1) & 
                                     (data['type'] == 'cfacts')].iloc[:int(len(temp)/2)].fitness.mean()]
@@ -189,7 +191,15 @@ def generate_genetic_plot_3D():
                     """)
     slider.js_on_change('value', callback)
     
+    p = Surface3d(x_good="dispx_good", y_good="dispy_good", z_good="dispz_good", 
+                  x_best="dispx_best", y_best="dispy_best", z_best="dispz_best",
+                  x_okay="dispx_okay", y_okay="dispy_okay", z_okay="dispz_okay",
+                  x_bad="dispx_bad",   y_bad="dispy_bad",   z_bad="dispz_bad",
+                  x_indiv=0, y_indiv=0, z_indiv=0,
+                  data_source=src, width=600, height=600)
+    
+    return column(row(column(slider, width=100), p), row(column(width=100), div_avg_text, div_avg, div_max_text, div_max))
   
 if __name__ == "__main__":
-    show(generate_genetic_plot())
-    #show(generate_genetic_plot_3D())
+    #show(generate_genetic_plot())
+    show(generate_genetic_plot_3D())

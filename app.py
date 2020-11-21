@@ -1,6 +1,6 @@
 from python_util.API import API
 from python_util.modules.ShapModel import ShapModel
-from python_util.Image_Helpers import generate_genetic_plot
+from python_util.Image_Helpers import generate_genetic_plot, generate_genetic_plot_3D
 
 from flask import Flask, render_template, request, redirect, url_for, make_response, flash
 from bokeh.embed import components
@@ -35,7 +35,10 @@ def home():
 @app.route('/genetic', methods=['POST', 'GET'])
 def genetic():
     plt, src = components(generate_genetic_plot())
-    return render_template('genetic_page.html', plt=plt, src=src)
+    plt_3d, src_3d = components(generate_genetic_plot_3D())
+    return render_template('genetic_page.html', 
+                            plt=plt, src=src,
+                            plt_3d=plt_3d, src_3d=src_3d)
         
 @app.route('/dataset', methods=['POST', 'GET'])
 def dataset():
