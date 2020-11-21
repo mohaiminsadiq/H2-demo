@@ -21,16 +21,43 @@ p {text-align: left;}
 
 <div class="container"> 
 
-<h1> Gentic Algo Artificial </h1>
+<div class="centered">
+<h1> Gentic Algorithm </h1>    
+<div class="centered">
+<p> 
+    In order to find bias in a ML model via burden on a specific class, we need to find “counterfactual” corresponding to each data point in the dataset.
+</p><p>
+    Counterfactual is the point that is closest to the original point, but results in the opposite classification by the ML model.
+</p><p>
+    Thus we can see the counterfactual as a measure, of how far is one individual from getting the opposite decision in a ML model, 
+    and burden is the average of this measure within some group of individuals (e.g. with a specific skin color, or a specific race).
+</p><p>
+    We find counterfactuals using a genetic algorithm, which is demonstrated below.    
+</p>
+<h2> Genetic Algorithm in Artificial Dataset </h2>
 <div class="centered">
     {{ plt | safe }}
     {{ src | safe }}
+<p> 
+    The above figure shows the evolution of the genetic algorithm, in finding the counterfactual (purple) for the individual (black square).
+</p><p>
+    It can be seen that the counterfactual gradually moves toward the closest possible point across the class boundary from the individual.
+</p><p>
+    In this case, the maximum fitness reaches 17.53 at generation 55. The fitness is the inverse of distance, so it means how close two points are.
+</p>
 </div>
 
-<h1> Gentic Algo Real </h1>
+<h2> Genetic Algorithm in Real Dataset </h2>
 <div class="centered">
     {{ plt_3d | safe }}
     {{ src_3d | safe }}
+<p> 
+    The above plot figure shows the evolution of the genetic algorithm in finding the counterfactual in the COMPAS dataset.
+</p><p>
+    Since the ML model is much more complicated than the above case, the class boundary is not linear and hard to see.
+</p><p>
+    However, it can be seen that the counterfactual gradually moves toward the individual, along with the generations.
+</p>
 </div>
 
 </div>
