@@ -80,6 +80,19 @@ class BurdenModel:
 
         return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model
 
+    def equalized_odds_random(self, dataset):
+        self.burden_val_test_split(dataset)
+
+        # Find mixing rates for equalized odds models
+        _, _, mix_rates = Model.eq_odds(self.group_0_val_model, self.group_1_val_model)
+
+        # Apply the mixing rates to the test models
+        self.eq_odds_group_0_test_model_rand, self.eq_odds_group_1_test_model_rand = Model.eq_odds(self.group_0_test_model,
+                                                                                self.group_1_test_model, 
+                                                                                mix_rates)
+
+        return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model_rand, self.eq_odds_group_1_test_model_rand
+
     
     def get_burden_scatter(self, dataset):
         my_path = os.path.abspath(os.path.dirname(__file__))
@@ -269,6 +282,7 @@ class BurdenModel:
         
         before0, before1, g0, g1 = self.equalized_odds_burden(dataset)
         _, _, pg0, pg1 = self.equalized_odds_part_burden(dataset)
+        _, _, rand0, rand1 = self.equalized_odds_random(dataset)
 
         table = [["None", 0, before0.accuracy(), 
           before0.fp_cost(), 
@@ -280,6 +294,16 @@ class BurdenModel:
           before1.fn_cost(), 
           before1.base_rate(), 
           before1.pred.mean()],
+         ["Random", 0, rand0.accuracy(), 
+          rand0.fp_cost(), 
+          rand0.fn_cost(), 
+          rand0.base_rate(), 
+          rand0.pred.mean()],
+         ["Random", 1, rand1.accuracy(), 
+          rand1.fp_cost(), 
+          rand1.fn_cost(), 
+          rand1.base_rate(), 
+          rand1.pred.mean()],
          ["Burden", 0, g0.accuracy(), 
           g0.fp_cost(), 
           g0.fn_cost(), 

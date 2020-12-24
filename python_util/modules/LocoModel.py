@@ -68,18 +68,18 @@ class LocoModel:
 
         return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model
 
-    def equalized_odds_part_loco(self, dataset):
+    def equalized_odds_random(self, dataset):
         self.loco_val_test_split(dataset)
 
         # Find mixing rates for equalized odds models
-        _, _, mix_rates = Model.loco_eq_opp(self.group_0_val_model, self.group_1_val_model)
+        _, _, mix_rates = Model.eq_odds(self.group_0_val_model, self.group_1_val_model)
 
         # Apply the mixing rates to the test models
-        self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model = Model.loco_eq_opp(self.group_0_test_model,
+        self.eq_odds_group_0_test_model_rand, self.eq_odds_group_1_test_model_rand = Model.eq_odds(self.group_0_test_model,
                                                                                 self.group_1_test_model, 
                                                                                 mix_rates)
 
-        return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model, self.eq_odds_group_1_test_model
+        return self.group_0_test_model, self.group_1_test_model, self.eq_odds_group_0_test_model_rand, self.eq_odds_group_1_test_model_rand
 
     
     def get_loco_scatter(self, dataset):
@@ -220,6 +220,7 @@ class LocoModel:
         full_data = pd.read_csv(data_filepath)
         
         before0, before1, g0, g1 = self.equalized_odds_loco(dataset)
+        _,_,rand0, rand1 = self.equalized_odds_random(dataset)
 
         table = [["None", 0, before0.accuracy(), 
           before0.fp_cost(), 
@@ -231,6 +232,16 @@ class LocoModel:
           before1.fn_cost(), 
           before1.base_rate(), 
           before1.pred.mean()],
+         ["Random", 0, rand0.accuracy(), 
+          rand0.fp_cost(), 
+          rand0.fn_cost(), 
+          rand0.base_rate(), 
+          rand0.pred.mean()],
+         ["Random", 1, rand1.accuracy(), 
+          rand1.fp_cost(), 
+          rand1.fn_cost(), 
+          rand1.base_rate(), 
+          rand1.pred.mean()],
          ["LOCO", 0, g0.accuracy(), 
           g0.fp_cost(), 
           g0.fn_cost(), 
@@ -460,9 +471,9 @@ class Model(namedtuple('Model', 'pred label loco')):
         sp2p, sn2p, op2p, on2p = tuple(mix_rates)
 
         # select random indices to flip in our model
-        self_fair_pred = self.pred.copy()
-        self_pp_indices, = np.nonzero(self.pred.round())
-        self_pn_indices, = np.nonzero(1 - self.pred.round())
+        self_fair_pred = np.array(self.pred.copy())
+        self_pp_indices, = np.nonzero(self_fair_pred.round())
+        self_pn_indices, = np.nonzero(1 - self_fair_pred.round())
         np.random.shuffle(self_pp_indices)
         np.random.shuffle(self_pn_indices)
 
@@ -473,9 +484,9 @@ class Model(namedtuple('Model', 'pred label loco')):
         self_fair_pred[p2n_indices] = 1 - self_fair_pred[p2n_indices]
 
         # select random indices to flip in the other model
-        othr_fair_pred = othr.pred.copy()
-        othr_pp_indices, = np.nonzero(othr.pred.round())
-        othr_pn_indices, = np.nonzero(1 - othr.pred.round())
+        othr_fair_pred = np.array(othr.pred.copy())
+        othr_pp_indices, = np.nonzero(othr_fair_pred.round())
+        othr_pn_indices, = np.nonzero(1 - othr_fair_pred.round())
         np.random.shuffle(othr_pp_indices)
         np.random.shuffle(othr_pn_indices)
 
